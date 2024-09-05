@@ -22,6 +22,7 @@ import {
   Users
 } from "lucide-react"
 import { Link, Outlet } from "react-router-dom"
+import { Icon } from '@iconify-icon/react'
 
 
 const Root = () => {
@@ -34,7 +35,8 @@ const Root = () => {
           {/* branding */}
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link to="/" className="flex items-center gap-2 font-semibold">
-              <Package2 className="h-6 w-6" />
+              {/* <Package2 className="h-6 w-6" /> */}
+              <Icon icon="emojione-monotone:oncoming-automobile" width="24px" height="24px"  style={{color: "black"}} />
               <span className="">Ride Recap</span>
             </Link>
           </div>
@@ -111,30 +113,14 @@ const Root = () => {
                   Analytics
                 </Link>
               </nav>
-              <div className="mt-auto">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Upgrade to Pro</CardTitle>
-                    <CardDescription>
-                      Unlock all features and get unlimited access to our
-                      support team.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button size="sm" className="w-full">
-                      Upgrade
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
             </SheetContent>
           </Sheet>
 
         </header>
 
-
-
-
+        {/* area which changes based on route
+            the outlet component facilitates plugin a view which is specified in router conf
+        */}
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <Outlet />
         </main>

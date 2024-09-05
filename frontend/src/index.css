@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: #242424;
+    --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 3.9%;
@@ -57,6 +57,11 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
+
+    /* Override root padding */
+    :root {
+      padding: 0 !important; /* Or any other desired value */
+    }
 }
 
 @layer base {
@@ -66,8 +71,4 @@
   body {
     @apply bg-background text-foreground;
   }
-}
-
-:root {
-  color-scheme: light dark;
 }

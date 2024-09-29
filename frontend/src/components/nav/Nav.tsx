@@ -39,7 +39,7 @@ export const navItems: NavItem[] = [
   },
   {
       icon: <Users className="h-4 w-4" />,
-      label: 'Users',
-      to: '/users',
+      label: 'Customers',
+      to: '/customers',
   },
 ];

@@ -1,9 +1,10 @@
 
-import './App.css'
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import Root from './app/layouts/Root';
+import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
+import './App.css';
 import AutoCare from './app/auto-care/AutoCare';
-import Home from './app/home/Home';
+import Customer from './app/customers/Customer';
+import Customers from './app/customers/Customers';
+import Root from './app/layouts/Root';
 import Wip from './app/wip/Wip';
 
 const router = createBrowserRouter([
@@ -20,8 +21,18 @@ const router = createBrowserRouter([
         element: <AutoCare />,
       },
       {
-        path: '/users',
-        element: <>Users</>
+        path: '/customers',
+        element: <Outlet />,
+        children: [
+          {
+            path: "",
+            element: <Customers />
+          },
+          {
+            path: "add",
+            element: <Customer />
+          }
+        ],
       }
     ],
   }

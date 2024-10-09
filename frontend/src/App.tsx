@@ -1,37 +1,48 @@
-
-import './App.css'
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import Root from './app/layouts/Root';
-import AutoCare from './app/auto-care/AutoCare';
-import Home from './app/home/Home';
-import Wip from './app/wip/Wip';
+import "./App.css";
+import { Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
+import Root from "./app/layouts/Root";
+import AutoCare from "./app/auto-care/AutoCare";
+import Wip from "./app/wip/Wip";
+import JobConfig from "./app/job-config/JobConfig";
+import JobView from "./app/job-config/JovView";
 
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <Root />,
     children: [
       {
-        path: '/home',
+        path: "/home",
         element: <Wip />,
       },
       {
-        path: '/auto-care',
+        path: "/auto-care",
         element: <AutoCare />,
       },
       {
-        path: '/users',
-        element: <>Users</>
-      }
+        path: "/users",
+        element: <>Users</>,
+      },
+      {
+        path: "/job-config",
+        element: <Outlet />,
+        children: [
+          {
+            path: "",
+            element: <JobConfig />,
+          },
+          {
+            path: ":jobID",
+            element: <JobView />,
+          },
+        ],
+      },
     ],
-  }
+  },
 ]);
 
 function App() {
-
-  return (
-    <RouterProvider router={router}/>
-  )
+  return <RouterProvider router={router} />;
 }
 
-export default App
+export default App;

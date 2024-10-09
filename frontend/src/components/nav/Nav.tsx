@@ -1,6 +1,6 @@
 import { NavItem } from "@/@types";
 import { Link } from "react-router-dom";
-import { Home, CarFront, Users } from "lucide-react";
+import { Home, CarFront, Users, Cog } from "lucide-react";
 
 export const NavBar = () => {
   return (
@@ -11,8 +11,6 @@ export const NavBar = () => {
     </nav>
   );
 };
-
-
 
 export const NavBarItem = (props: NavItem) => {
   return (
@@ -28,18 +26,23 @@ export const NavBarItem = (props: NavItem) => {
 
 export const navItems: NavItem[] = [
   {
-      icon: <Home className="h-4 w-4" />,
-      label: 'Home',
-      to: '/home',
+    icon: <Home className="h-4 w-4" />,
+    label: "Home",
+    to: "/home",
   },
   {
-      icon: <CarFront className="h-4 w-4" />,
-      label: 'Auto Care',
-      to: '/auto-care',
+    icon: <CarFront className="h-4 w-4" />,
+    label: "Auto Care",
+    to: "/auto-care",
   },
   {
-      icon: <Users className="h-4 w-4" />,
-      label: 'Users',
-      to: '/users',
+    icon: <Cog className="h-4 w-4" />,
+    label: "Job Configuration",
+    to: "/job-config",
+  },
+  {
+    icon: <Users className="h-4 w-4" />,
+    label: "Users",
+    to: "/users",
   },
 ];

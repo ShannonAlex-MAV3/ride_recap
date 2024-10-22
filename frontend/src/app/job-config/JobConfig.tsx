@@ -10,11 +10,12 @@ import {
 } from "@/components/ui/table";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { fetchJobConfig } from "./Utills";
+import { fetchJobConfig, getStatusEnumValue } from "./Utills";
+import { Home, Pen } from "lucide-react";
 
 const JobConfig = () => {
   const [jobs, setJobs] = useState<JobConfig[]>([]);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   useEffect(() => {
     const loadJobs = async () => {
@@ -33,7 +34,9 @@ const JobConfig = () => {
     <>
       <div className="flex items-center">
         <h1 className="text-lg font-semibold md:text-2xl">Job Configuration</h1>
-        <Button className="ml-4">Add</Button>
+        <Button className="ml-4">
+          <Link to={`new`}>Add</Link>
+        </Button>
       </div>
       <div>
         <Table>
@@ -54,9 +57,14 @@ const JobConfig = () => {
                 >
                   <TableCell className="font-medium">{job.jobCode}</TableCell>
                   <TableCell>{job.jobName}</TableCell>
-                  <TableCell className="text-right">{job.status}</TableCell>
-                  <Link to={`:${job.jobID}`}>
-                    <TableCell>View</TableCell>
+                  <TableCell className="text-right">
+                    {getStatusEnumValue(job.status)}
+                    {/* ToDo add something like tag */}
+                  </TableCell>
+                  <Link to={`${job.jobID}`}>
+                    <TableCell>
+                      <Pen className="h-4 w-4" />
+                    </TableCell>
                   </Link>
                 </TableRow>
               ))

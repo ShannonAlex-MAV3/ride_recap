@@ -4,7 +4,8 @@ import Root from "./app/layouts/Root";
 import AutoCare from "./app/auto-care/AutoCare";
 import Wip from "./app/wip/Wip";
 import JobConfig from "./app/job-config/JobConfig";
-import JobView from "./app/job-config/JovView";
+import JobView from "./app/job-config/JobView";
+import AddEditJob from "./app/job-config/AddEdit";
 
 const router = createBrowserRouter([
   {
@@ -33,7 +34,21 @@ const router = createBrowserRouter([
           },
           {
             path: ":jobID",
-            element: <JobView />,
+            element: <Outlet />,
+            children: [
+              {
+                path: "",
+                element: <JobView />,
+              },
+              {
+                path: "edit",
+                element: <AddEditJob />,
+              },
+            ],
+          },
+          {
+            path: "new",
+            element: <AddEditJob />,
           },
         ],
       },

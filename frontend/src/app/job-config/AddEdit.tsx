@@ -56,10 +56,12 @@ const AddEditJob = () => {
   }, [jobID]);
 
   return (
-    <div className="p-6">
+    <div className="p-2">
       <h1 className="text-2xl font-bold mb-4">
         {isEditing ? "Edit Job" : "Add New Job"}
       </h1>
+
+      <div className="flex-grow p-4 items-center justify-center rounded-lg border border-dashed shadow-sm">
 
       <Form {...form}>
         <form className="space-y-4" onSubmit={form.handleSubmit(submitJob)}>
@@ -175,13 +177,20 @@ const AddEditJob = () => {
             <Button
               type="reset"
               className="btn btn-secondary"
-              onClick={form.reset}
+              onClick={() => form.reset({
+                jobCode: jobData?.jobCode ?? "",
+                jobName: jobData?.jobName ?? "",
+                description: jobData?.description ?? "",
+                category: jobData?.category ?? "",
+                status: jobData?.status ?? "",
+              })}
             >
               Discard
             </Button>
           </div>
         </form>
       </Form>
+      </div>
     </div>
   );
 };

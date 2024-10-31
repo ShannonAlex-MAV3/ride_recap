@@ -38,6 +38,9 @@ const JobConfig = () => {
           <Link to={`new`}>Add</Link>
         </Button>
       </div>
+      <div
+            className="flex-grow p-4 items-center justify-center rounded-lg border border-dashed shadow-sm"
+          >
       <div>
         <Table>
           <TableCaption>A list of Jobs.</TableCaption>
@@ -77,6 +80,7 @@ const JobConfig = () => {
             )}
           </TableBody>
         </Table>
+      </div>
       </div>
     </>
   );

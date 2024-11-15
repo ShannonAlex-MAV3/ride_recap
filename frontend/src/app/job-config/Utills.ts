@@ -1,4 +1,7 @@
 import { z } from "zod";
+import axios from "axios";
+import { API_URLS } from "@/api";
+import { useNavigate } from "react-router-dom";
 
 // all the functions that are used in job-config
 export interface JobConfig {
@@ -27,37 +30,13 @@ export enum Status {
 }
 
 export const fetchJobConfig = async (): Promise<JobConfig[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const mockJobs = [
-        {
-          jobID: 1,
-          jobCode: "JB001",
-          jobName: "Oil Change",
-          status: "ACT",
-          description: "Test Data",
-          category: "GM",
-        },
-        {
-          jobID: 2,
-          jobCode: "JB002",
-          jobName: "Oil Change",
-          status: "ACT",
-          description: "Test Data",
-          category: "GM",
-        },
-        {
-          jobID: 3,
-          jobCode: "JB003",
-          jobName: "Brake Inspection",
-          status: "INA",
-          description: "Test Data",
-          category: "GM",
-        },
-      ];
-      resolve(mockJobs);
-    }, 1000);
-  });
+  try {
+    const response = await axios.get(API_URLS.getAllJobConfigs);
+    return response.data as JobConfig[];
+  } catch (error) {
+    console.error("Error fetching job configurations:", error);
+    return [];
+  }
 };
 
 export const formSchema = z.object({
@@ -69,8 +48,30 @@ export const formSchema = z.object({
   status: z.string().min(2).max(50),
 });
 
-export const submitJob = (formVals: any) => {
-  console.log("Form vals: ", formVals);
+export const createJob = async (formVals: any) => {
+  
+  console.log("createJob Form vals: ", formVals);
+    // try {
+      
+
+    // } catch (error) {
+    //   console.error("Error creating job configurations:", error);
+    //   return [];
+    // }
+
+    const response = await axios.post(API_URLS.saveJobConfig, formVals);
+      // return response.data as JobConfig[];
+
+    const jobData = response.data;
+    console.log("Job created successfully:", jobData);
+    return response;
+      
+      // Assuming `jobID` is returned in `jobData`
+      // navigate(`/job-config/${jobData.jobID}`);
+};
+
+export const updateJob = (formVals: any) => {
+  console.log("updateJob Form vals: ", formVals);
 };
 
 export const getCategoryEnumValue = (category: string) => {

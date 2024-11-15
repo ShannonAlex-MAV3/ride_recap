@@ -12,6 +12,7 @@ const JobView = () => {
   const { jobID } = useParams<{ jobID: string }>();
   const [job, setJob] = useState<JobConfig | null>(null);
   const [loading, setLoading] = useState(true);
+  //@ts-ignore
   const [isEdit, setIsEdit] = useState(false);
 
   useEffect(() => {

@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { Button } from "@/components/ui/button";
 import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { z } from "zod";
-import { fetchJobConfig, formSchema, JobConfig, submitJob } from "./Utills";
+import { fetchJobConfig, formSchema, JobConfig, createJob, updateJob } from "./Utills";
 import { Textarea } from "@/components/ui/textarea";
 
 const AddEditJob = () => {
@@ -55,6 +56,14 @@ const AddEditJob = () => {
     }
   }, [jobID]);
 
+  const submitJob = (formVals: any) => {
+    const updateRQ ={
+      ...jobData,
+      ...formVals
+    }
+    isEditing ? updateJob(updateRQ) : createJob(updateRQ)
+  };
+
   return (
     <div className="p-2">
       <h1 className="text-2xl font-bold mb-4">
@@ -64,7 +73,7 @@ const AddEditJob = () => {
       <div className="flex-grow p-4 items-center justify-center rounded-lg border border-dashed shadow-sm">
 
       <Form {...form}>
-        <form className="space-y-4" onSubmit={form.handleSubmit(submitJob)}>
+        <form className="space-y-4" onSubmit={form.handleSubmit((submitJob))}>
           <FormField
             control={form.control}
             name="jobCode"

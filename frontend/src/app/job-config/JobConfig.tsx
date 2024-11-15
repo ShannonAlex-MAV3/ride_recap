@@ -8,12 +8,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Pen } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { fetchJobConfig, getStatusEnumValue } from "./Utills";
-import { Home, Pen } from "lucide-react";
+import { Link } from "react-router-dom";
+import { fetchJobConfig, getStatusEnumValue, JobConfig } from "./Utills";
 
-const JobConfig = () => {
+const JobConfigBase = () => {
   const [jobs, setJobs] = useState<JobConfig[]>([]);
   // const navigate = useNavigate();
 
@@ -86,4 +86,4 @@ const JobConfig = () => {
   );
 };
 
-export default JobConfig;
+export default JobConfigBase;

@@ -1,11 +1,10 @@
-import "./App.css";
 import { Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
-import Root from "./app/layouts/Root";
+import "./App.css";
 import AutoCare from "./app/auto-care/AutoCare";
-import Wip from "./app/wip/Wip";
-import JobConfig from "./app/job-config/JobConfig";
-import JobView from "./app/job-config/JobView";
 import AddEditJob from "./app/job-config/AddEdit";
+import JobConfigBase from "./app/job-config/JobConfig";
+import Root from "./app/layouts/Root";
+import Wip from "./app/wip/Wip";
 
 const router = createBrowserRouter([
   {
@@ -30,7 +29,7 @@ const router = createBrowserRouter([
         children: [
           {
             path: "",
-            element: <JobConfig />,
+            element: <JobConfigBase />,
           },
           // {
           //   path: ":jobID",

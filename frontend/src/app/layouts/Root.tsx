@@ -2,27 +2,18 @@ import { CustomBreadCrumb } from "@/components/nav/BreadCrumb"
 import { NavBar } from "@/components/nav/Nav"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Icon } from '@iconify-icon/react'
 import {
   Home,
   LineChart,
   Menu,
   Package,
   Package2,
-  Search,
   ShoppingCart,
   Users
 } from "lucide-react"
 import { Link, Outlet } from "react-router-dom"
-import { Icon } from '@iconify-icon/react'
 
 
 const Root = () => {

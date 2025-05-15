@@ -1,0 +1,14 @@
+//ORM client
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// enum crdb_internal_region {
+//   aws_ap_southeast_1 @map("aws-ap-southeast-1")
+// }

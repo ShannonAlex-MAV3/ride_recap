@@ -11,11 +11,16 @@ import {
 import { Pen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { fetchJobConfig, getStatusEnumValue, JobConfig } from "./Utills";
+import {
+  fetchJobConfig,
+  getStatusEnumColor,
+  getStatusEnumValue,
+  JobConfig,
+} from "./Utills";
+import { Badge } from "@/components/ui/badge";
 
 const JobConfigBase = () => {
   const [jobs, setJobs] = useState<JobConfig[]>([]);
-  // const navigate = useNavigate();
 
   useEffect(() => {
     const loadJobs = async () => {
@@ -26,10 +31,6 @@ const JobConfigBase = () => {
     loadJobs();
   }, []);
 
-  // const handleRowClick = (jobID: number) => {
-  //   navigate(`/job-config/${jobID}`);
-  // };
-
   return (
     <>
       <div className="flex items-center">
@@ -38,49 +39,49 @@ const JobConfigBase = () => {
           <Link to={`new`}>Add</Link>
         </Button>
       </div>
-      <div
-            className="flex-grow p-4 items-center justify-center rounded-lg border border-dashed shadow-sm"
-          >
-      <div>
-        <Table>
-          <TableCaption>A list of Jobs.</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">Job Code</TableHead>
-              <TableHead>Job Name</TableHead>
-              <TableHead className="text-right">Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {jobs.length > 0 ? (
-              jobs.map((job) => (
-                <TableRow
-                  key={job.jobID}
-                  className="cursor-pointer hover:bg-gray-100"
-                >
-                  <TableCell className="font-medium">{job.jobCode}</TableCell>
-                  <TableCell>{job.jobName}</TableCell>
-                  <TableCell className="text-right">
-                    {getStatusEnumValue(job.status)}
-                    {/* ToDo add something like tag */}
-                  </TableCell>
-                  <Link to={`${job.jobID}`}>
-                    <TableCell>
-                      <Pen className="h-4 w-4" />
-                    </TableCell>
-                  </Link>
-                </TableRow>
-              ))
-            ) : (
+      <div className="flex-grow p-4 items-center justify-center rounded-lg border border-dashed shadow-sm">
+        <div>
+          <Table>
+            <TableCaption>A list of Jobs.</TableCaption>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={3} className="text-center">
-                  Loading...
-                </TableCell>
+                <TableHead className="w-[100px]">Job Code</TableHead>
+                <TableHead>Job Name</TableHead>
+                <TableHead className="text-right">Status</TableHead>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {jobs.length > 0 ? (
+                jobs.map((job) => (
+                  <TableRow
+                    key={job.jobID}
+                    className="cursor-pointer hover:bg-gray-100"
+                  >
+                    <TableCell className="font-medium">{job.jobCode}</TableCell>
+                    <TableCell>{job.jobName}</TableCell>
+                    <TableCell className="text-right">
+                      <Badge variant={getStatusEnumColor(job.status)}>
+                        {getStatusEnumValue(job.status)}
+                      </Badge>
+                      {/* ToDo add something like tag */}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Link to={`${job.jobID}`}>
+                        <Pen className="h-4 w-4 hover:text-blue-500" />
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center">
+                    Loading...
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </>
   );

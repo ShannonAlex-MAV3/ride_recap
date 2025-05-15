@@ -21,3 +21,6 @@ Project to manage repairs and services done to a ride in an automobile workshop
 > npm install
 
 > npm run dev 
+
+
+npx prisma migrate dev

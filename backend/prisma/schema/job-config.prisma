@@ -1,0 +1,30 @@
+enum StatusP {
+  ACT
+  INA
+}
+
+enum JobCategoriesP {
+  GM
+  ID
+  ER
+  BS
+  TS
+  AC
+  BP
+  TW
+}
+
+model JobConfig {
+  // jobID       Int      @id @default(sequence())
+  jobID       Int            @id @default(autoincrement())
+  // jobCode     String   @unique @db.String(255)
+  // jobName     String   @db.String(255)
+  // description String   @db.String(255)
+  jobCode     String         @unique
+  jobName     String
+  description String
+  category    JobCategoriesP
+  status      StatusP        @default(ACT)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}

@@ -1,7 +1,6 @@
 import { z } from "zod";
 import axios from "axios";
 import { API_URLS } from "@/api";
-import { useNavigate } from "react-router-dom";
 
 // all the functions that are used in job-config
 export interface JobConfig {
@@ -24,7 +23,7 @@ export enum JobCategories {
   TW = "Tires and Wheels",
 }
 
-export enum Status {
+export enum Status {  // can move to a common place
   ACT = "Active",
   INA = "Inactive",
 }
@@ -44,43 +43,52 @@ export const formSchema = z.object({
   jobCode: z.string().nullable().optional(),
   jobName: z.string().min(2).max(50),
   description: z.string().min(2).max(255),
-  category: z.string().min(2).max(50),
-  status: z.string().min(2).max(50),
+  category: z.enum(["GM", "ID", "ER", "BS", "TS", "AC", "BP", "TW"], {
+    errorMap: () => ({ message: "Please select a job category" }),
+  }),
+  status: z.enum(["ACT", "INA"], {
+    errorMap: () => ({ message: "Please select a status" }),
+  }),
 });
 
 export const createJob = async (formVals: any) => {
-  
-  console.log("createJob Form vals: ", formVals);
-    // try {
-      
 
-    // } catch (error) {
-    //   console.error("Error creating job configurations:", error);
-    //   return [];
-    // }
+  const response = await axios.post(API_URLS.saveJobConfig, formVals);
 
-    const response = await axios.post(API_URLS.saveJobConfig, formVals);
-      // return response.data as JobConfig[];
+  const jobData = response.data;
+  return jobData;
 
-    const jobData = response.data;
-    console.log("Job created successfully:", jobData);
-    return response;
-      
-      // Assuming `jobID` is returned in `jobData`
-      // navigate(`/job-config/${jobData.jobID}`);
+  // Assuming `jobID` is returned in `jobData`
+  // navigate(`/job-config/${jobData.jobID}`);
 };
 
-export const updateJob = (formVals: any) => {
+export const updateJob = async (formVals: any) => {
   console.log("updateJob Form vals: ", formVals);
+
+  const response = await axios.put(API_URLS.updateJobConfig, formVals);
+
+  const jobData = response.data;
+  return jobData;
 };
 
 export const getCategoryEnumValue = (category: string) => {
   return JobCategories[category as keyof typeof JobCategories];
 };
 
-export const getStatusEnumValue = (status: string) => {
+export const getStatusEnumValue = (status: string) => {  // can move to a common place
   return Status[status as keyof typeof Status];
 };
+
+export const getStatusEnumColor = (status: string) => {
+  switch (status) {
+    case 'ACT':
+      return 'default';
+    case 'INA':
+      return 'destructive';
+    default:
+      return 'outline';
+  }
+}
 
 // export const handleRowClick = (jobCode: string) => {
 //   console.log("HandleRowClick: jobCode -->", jobCode);

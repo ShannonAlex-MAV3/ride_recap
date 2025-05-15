@@ -1,6 +1,13 @@
 //@ts-nocheck
 import { Button } from "@/components/ui/button";
-import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -12,15 +19,24 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { fetchJobConfig, formSchema, JobConfig, createJob, updateJob } from "./Utills";
+import {
+  fetchJobConfig,
+  formSchema,
+  JobConfig,
+  createJob,
+  updateJob,
+} from "./Utills";
 import { Textarea } from "@/components/ui/textarea";
 
 const AddEditJob = () => {
   const { jobID } = useParams<{ jobID: string }>();
   const [jobData, setJobData] = useState<JobConfig | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  // const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,13 +72,22 @@ const AddEditJob = () => {
     }
   }, [jobID]);
 
-  const submitJob = (formVals: any) => {
-    const updateRQ ={
+  const submitJob = async (formVals: any) => {
+    const updateRQ = {
       ...jobData,
-      ...formVals
+      ...formVals,
+    };
+
+    if (isEditing) {
+      const updatedJob = await updateJob(updateRQ);
+      setJobData(updatedJob);
+    } else {
+      const newJob = await createJob(updateRQ);
+      navigate(`/job-config/${newJob.jobID}`);
     }
-    isEditing ? updateJob(updateRQ) : createJob(updateRQ)
   };
+
+  // const isNew = jobID ? false : true
 
   return (
     <div className="p-2">
@@ -71,134 +96,157 @@ const AddEditJob = () => {
       </h1>
 
       <div className="flex-grow p-4 items-center justify-center rounded-lg border border-dashed shadow-sm">
+        <Form {...form}>
+          <form className="space-y-4" onSubmit={form.handleSubmit(submitJob)}>
+            <FormField
+              control={form.control}
+              name="jobCode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="block text-sm font-medium">
+                    Job Code
+                  </FormLabel>
+                  <Input
+                    {...field}
+                    className="mt-1 block w-4/5 rounded-md border-gray-300 shadow-sm"
+                    disabled
+                    placeholder="Code will auto generated."
+                  />
+                </FormItem>
+              )}
+            />
 
-      <Form {...form}>
-        <form className="space-y-4" onSubmit={form.handleSubmit((submitJob))}>
-          <FormField
-            control={form.control}
-            name="jobCode"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="block text-sm font-medium">
-                  Job Code
-                </FormLabel>
-                <Input
-                  {...field}
-                  className="mt-1 block w-4/5 rounded-md border-gray-300 shadow-sm"
-                  disabled
-                  placeholder="Code will auto generated."
-                />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="jobName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="block text-sm font-medium">
+                    Job Name
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      className="mt-1 block w-4/5 rounded-md border-gray-300 shadow-sm"
+                      required
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="jobName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="block text-sm font-medium">
-                  Job Name
-                </FormLabel>
-                <Input
-                  {...field}
-                  className="mt-1 block w-4/5 rounded-md border-gray-300 shadow-sm"
-                  required
-                />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="block text-sm font-medium">
+                    Description
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      className="mt-1 block w-4/5 rounded-md border-gray-300 shadow-sm"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="block text-sm font-medium">
-                  Description
-                </FormLabel>
-                <Textarea
-                  {...field}
-                  className="mt-1 block w-4/5 rounded-md border-gray-300 shadow-sm"
-                />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="block text-sm font-medium">
+                    Job Category
+                  </FormLabel>
+                  <FormControl>
+                    <Select {...field} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-4/5">
+                        <SelectValue placeholder="" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="GM">General Maintenance</SelectItem>
+                        <SelectItem value="ID">
+                          Inspections and Diagnostics
+                        </SelectItem>
+                        <SelectItem value="ER">
+                          Engine Repair & Maintenance
+                        </SelectItem>
+                        <SelectItem value="BS">
+                          Brakes and Suspension
+                        </SelectItem>
+                        <SelectItem value="TS">
+                          Transmission Services
+                        </SelectItem>
+                        <SelectItem value="AC">
+                          HVAC (Heating, Ventilation, Air Conditioning)
+                        </SelectItem>
+                        <SelectItem value="BP">Body and Paintwork</SelectItem>
+                        <SelectItem value="TW">Tires and Wheels</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="category"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="block text-sm font-medium">
-                  Job Category
-                </FormLabel>
-                <Select {...field} onValueChange={field.onChange}>
-                  <SelectTrigger className="w-4/5">
-                    <SelectValue placeholder="" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="GM">General Maintenance</SelectItem>
-                    <SelectItem value="ID">
-                      Inspections and Diagnostics
-                    </SelectItem>
-                    <SelectItem value="ER">
-                      Engine Repair & Maintenance
-                    </SelectItem>
-                    <SelectItem value="BS">Brakes and Suspension:</SelectItem>
-                    <SelectItem value="TS">Transmission Services</SelectItem>
-                    <SelectItem value="AC">
-                      HVAC (Heating, Ventilation, Air Conditioning)
-                    </SelectItem>
-                    <SelectItem value="BP">Body and Paintwork</SelectItem>
-                    <SelectItem value="TW">Tires and Wheels</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="block text-sm font-medium">
+                    Status
+                  </FormLabel>
+                  <FormControl>
+                    <Select {...field} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-4/5">
+                        <SelectValue placeholder="" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ACT">Active</SelectItem>
+                        <SelectItem value="INA">Inactive</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="block text-sm font-medium">
-                  Status
-                </FormLabel>
-                <Select {...field} onValueChange={field.onChange}>
-                  <SelectTrigger className="w-4/5">
-                    <SelectValue placeholder="" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ACT">Active</SelectItem>
-                    <SelectItem value="INA">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            )}
-          />
-
-          <div className="flex space-x-4">
-            <Button type="submit" className="btn btn-primary">
-              {isEditing ? "Save Changes" : "Add Job"}
-            </Button>
-            <Button
-              type="reset"
-              className="btn btn-secondary"
-              onClick={() => form.reset({
-                jobCode: jobData?.jobCode ?? "",
-                jobName: jobData?.jobName ?? "",
-                description: jobData?.description ?? "",
-                category: jobData?.category ?? "",
-                status: jobData?.status ?? "",
-              })}
-            >
-              Discard
-            </Button>
-          </div>
-        </form>
-      </Form>
+            <div className="flex space-x-4">
+              <Button
+                type="submit"
+                className="btn btn-primary"
+                disabled={
+                  isEditing ? !form.formState.isDirty : !form.formState.isValid
+                }
+              >
+                {isEditing ? "Save Changes" : "Add Job"}
+              </Button>
+              <Button
+                type="reset"
+                className="btn btn-secondary"
+                onClick={() =>
+                  form.reset({
+                    jobCode: jobData?.jobCode ?? "",
+                    jobName: jobData?.jobName ?? "",
+                    description: jobData?.description ?? "",
+                    category: jobData?.category ?? "",
+                    status: jobData?.status ?? "",
+                  })
+                }
+              >
+                Discard
+              </Button>
+            </div>
+          </form>
+        </Form>
       </div>
     </div>
   );

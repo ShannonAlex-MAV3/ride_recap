@@ -31,20 +31,6 @@ const router = createBrowserRouter([
             path: "",
             element: <JobConfigBase />,
           },
-          // {
-          //   path: ":jobID",
-          //   element: <Outlet />,
-          //   children: [
-          //     {
-          //       path: "",
-          //       element: <JobView />,
-          //     },
-          //     {
-          //       path: "edit",
-          //       element: <AddEditJob />,
-          //     },
-          //   ],
-          // },
           {
             path: ":jobID",
             element: <AddEditJob />,

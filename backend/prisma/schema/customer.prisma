@@ -1,0 +1,30 @@
+model Customer {
+  customerID   Int      @id @default(autoincrement())
+  customerCode String   @unique
+  firstName    String
+  lastName     String
+  email        String   @unique
+  phone        String
+  address      String
+  status       StatusP  @default(ACT)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime?
+
+  vehicles Vehicle[] // One-to-many relationship
+}
+
+model Vehicle {
+  vehicleID    Int      @id @default(autoincrement())
+  licensePlate String   @unique
+  make         String   
+  model        String   
+  year         Int
+  color        String   
+  // vin          String   @unique 
+  status       StatusP  @default(ACT)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime?
+
+  customer   Customer @relation(fields: [customerID], references: [customerID])
+  customerID Int
+}

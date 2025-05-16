@@ -4,6 +4,8 @@ import { createJobCode } from "./support";
 
 const prisma = new PrismaClient();
 
+/** DO WE NEED: track who made the update or need versioning **/
+
 export const getAllJobConfigs = async (): Promise<JobConfig[]> => {
   console.log("Start: Fetching all job configurations.");
 
@@ -14,7 +16,6 @@ export const getAllJobConfigs = async (): Promise<JobConfig[]> => {
   return allJobs;
 };
 
-// ToDo: created@, updated@
 export const saveJobConfig = async (job: JobConfig): Promise<JobConfig> => {
   console.log("Start: Saving new job configuration.");
 
@@ -70,13 +71,13 @@ export const getJobConfigById = async (
 };
 
 export const updateJobConfig = async (job: JobConfig): Promise<JobConfig> => {
-  console.log("Start: Update job configuration.");
+  console.log("Start: Updating job configuration.");
 
   const updatedJob = await prisma.jobConfig.update({
     where: {
       jobID: job.jobID,
     },
-    data: job,
+    data: { ...job, updatedAt: new Date(), },
   });
 
   console.log("End: Update job configuration for ", updatedJob.jobCode);

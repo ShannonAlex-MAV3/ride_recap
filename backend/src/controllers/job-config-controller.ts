@@ -3,7 +3,7 @@ import * as jobConfigService from "../services/job-config/service";
 import { JobConfig } from "../@types";
 
 export const getAllJobConfigs = async (req: Request, res: Response) => {
-  
+
   console.log("Start: get all the job configs.");
 
   try {
@@ -19,13 +19,13 @@ export const getAllJobConfigs = async (req: Request, res: Response) => {
   }
 
   console.log("End: get all the job configs.");
-  
+
 };
 
 export const saveJobConfig = async (req: Request, res: Response) => {
 
   console.log("Start: create new job config.");
-  
+
   try {
     const newJob: JobConfig = req.body;
     const job = await jobConfigService.saveJobConfig(newJob);
@@ -38,7 +38,7 @@ export const saveJobConfig = async (req: Request, res: Response) => {
       res.status(500).json({ message: "An unknown error occurred" });
     }
   }
-  
+
   console.log("End: create new job config.");
 
 };

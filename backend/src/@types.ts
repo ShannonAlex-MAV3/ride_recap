@@ -9,7 +9,7 @@ export interface JobConfig {
   category: JobCategoriesP;
   status: StatusP;
   createdAt?: Date; 
-  updatedAt?: Date;
+  updatedAt?: Date | null;
 }
 
 export const JobCategories: any = {
@@ -26,4 +26,30 @@ export const JobCategories: any = {
 export const Status: any = {
   [StatusP.ACT]: "Active",
   [StatusP.INA]: "Inactive",
+}
+
+export interface Customer {
+  customerID?: number;
+  customerCode?: string;
+  firstName: string;
+  lastName: string; // can last name be null?
+  email: string;
+  phone: string;
+  address: string;
+  status: StatusP;
+  createdAt?: Date; 
+  updatedAt?: Date | null;
+  vehicles?: Vehicle[]
+}
+
+export interface Vehicle {
+  vehicleID?: number;
+  licensePlate: string;
+  make: string;
+  model: string;
+  year: number;
+  color: string;
+  status: StatusP;
+  createdAt?: Date; 
+  updatedAt?: Date | null;
 }

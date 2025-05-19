@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
 import * as jobConfigService from "../services/job-config/service";
 import { JobConfig } from "../@types";
+import logger from "../logger";
 
 export const getAllJobConfigs = async (req: Request, res: Response) => {
 
-  console.log("Start: get all the job configs.");
+  logger.info("Start: get all the job configs.");
 
   try {
     const jobs = await jobConfigService.getAllJobConfigs();
@@ -16,15 +17,17 @@ export const getAllJobConfigs = async (req: Request, res: Response) => {
     } else {
       res.status(500).json({ message: "An unknown error occurred" });
     }
+    logger.error("Error", { message: (error as Error).message, stack: (error as Error).stack });
+
   }
 
-  console.log("End: get all the job configs.");
+  logger.info("End: get all the job configs.");
 
 };
 
 export const saveJobConfig = async (req: Request, res: Response) => {
 
-  console.log("Start: create new job config.");
+  logger.info("Start: create new job config.");
 
   try {
     const newJob: JobConfig = req.body;
@@ -37,15 +40,17 @@ export const saveJobConfig = async (req: Request, res: Response) => {
     } else {
       res.status(500).json({ message: "An unknown error occurred" });
     }
+    logger.error("Error", { message: (error as Error).message, stack: (error as Error).stack });
+
   }
 
-  console.log("End: create new job config.");
+  logger.info("End: create new job config.");
 
 };
 
 export const getJobConfigById = async (req: Request, res: Response) => {
 
-  console.log("Start: get job config  by id: ", req.params.jobId);
+  logger.info("Start: get job config  by id: ", req.params.jobId);
 
   try {
     const jobId = parseInt(req.params.jobId, 10);
@@ -61,15 +66,17 @@ export const getJobConfigById = async (req: Request, res: Response) => {
     } else {
       res.status(500).json({ message: "An unknown error occurred" });
     }
+    logger.error("Error", { message: (error as Error).message, stack: (error as Error).stack });
+
   }
 
-  console.log("End: get job config  by id :", req.params.jobId);
+  logger.info("End: get job config  by id :", req.params.jobId);
 
 };
 
 export const updateJobConfig = async (req: Request, res: Response) => {
 
-  console.log("Start: update new job config.");
+  logger.info("Start: update new job config.");
 
   try {
     const job: JobConfig = req.body;
@@ -82,8 +89,10 @@ export const updateJobConfig = async (req: Request, res: Response) => {
     } else {
       res.status(500).json({ message: "An unknown error occurred" });
     }
+    logger.error("Error", { message: (error as Error).message, stack: (error as Error).stack });
+
   }
 
-  console.log("End: update new job config.");
+  logger.info("End: update new job config.");
 };
 

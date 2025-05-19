@@ -1,11 +1,12 @@
 import { PrismaClient } from "@prisma/client";
 import { Customer, Vehicle } from "../../@types";
 import { createCustomerCode } from "../customer/support"
+import logger from "../../logger";
 
 const prisma = new PrismaClient();
 
 export const getAllCustomers = async (): Promise<Customer[]> => {
-  console.log("Start: Fetching all Customers.");
+  logger.info("Start: Fetching all Customers");
 
   const customers = await prisma.customer.findMany({
     // include: {
@@ -13,13 +14,13 @@ export const getAllCustomers = async (): Promise<Customer[]> => {
     // },
   });
 
-  console.log(`End: Fetched ${customers.length} Customers.`);
+ logger.info(`End: Fetched ${customers.length} Customers.`);
 
   return customers;
 };
 
 export const saveCustomer = async (customer: Customer): Promise<Customer> => {
-  console.log("Start: Saving new customer.");
+  logger.info("Start: Saving new customer.");
 
   // Be cautious of potential concurrency issues. If multiple records are being created simultaneously, this approach could lead to duplicate job codes.
   const latestCustomer = await getLatestCustomer();
@@ -27,7 +28,7 @@ export const saveCustomer = async (customer: Customer): Promise<Customer> => {
   const latestCustomerID = latestCustomer?.customerID || 0;
 
   const newCustomerCode = createCustomerCode(latestCustomerID);
-  console.log(`Generated customer code: ${newCustomerCode}`);
+  logger.info(`Generated customer code: ${newCustomerCode}`);
 
   const newCustomer = {
     customerCode: newCustomerCode,
@@ -62,19 +63,19 @@ export const saveCustomer = async (customer: Customer): Promise<Customer> => {
     include: { vehicles: true }, // Optional, if you want vehicles in the response
   });
 
-  console.log("End: Saved new customer.", savedCustomer);
+  logger.info("End: Saved new customer.", savedCustomer);
 
   return savedCustomer;
 };
 
 export const getLatestCustomer = async (): Promise<Customer | null> => {
-  console.log("Start: Fetching latest Customer.");
+  logger.info("Start: Fetching latest Customer.");
 
   const latestCustomer = await prisma.customer.findFirst({
     orderBy: { customerID: "desc" },
   });
 
-  console.log("End: Fetched latest Customer.", latestCustomer);
+  logger.info("End: Fetched latest Customer.", latestCustomer);
 
   return latestCustomer;
 };
@@ -82,7 +83,7 @@ export const getLatestCustomer = async (): Promise<Customer | null> => {
 export const getCustomerById = async (
   customerID: number
 ): Promise<Customer | null> => {
-  console.log(`Start: Fetching customer by ID: ${customerID}`);
+  logger.info(`Start: Fetching customer by ID: ${customerID}`);
 
   const customer = await prisma.customer.findUnique({
     where: {
@@ -93,13 +94,13 @@ export const getCustomerById = async (
     },
   });
 
-  console.log(`End: Fetched customer: ${customer}`);
+  logger.info(`End: Fetched customer: ${customer}`);
 
   return customer;
 };
 
 export const updateCustomer = async (customer: Customer): Promise<Customer> => {
-  console.log("Start: Updating customer.");
+  logger.info("Start: Updating customer.");
 
   const updatedCustomer = await prisma.customer.update({
     where: {
@@ -143,7 +144,7 @@ export const updateCustomer = async (customer: Customer): Promise<Customer> => {
     },
   });
 
-  console.log("End: Update customer for.", updatedCustomer.customerCode);
+  logger.info("End: Update customer for.", updatedCustomer.customerCode);
 
   return updatedCustomer;
 };

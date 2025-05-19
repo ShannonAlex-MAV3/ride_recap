@@ -3,9 +3,9 @@ import dotenv from "dotenv";
 // import client, { initializeDB } from "./config/db";
 import jobRoutes from "./routes/job-config";
 import customerRoutes from "./routes/customer";
+import logger from "./logger";
 
 const cors =  require("cors")
-
 
 // Load environment variables from .env file
 dotenv.config();
@@ -25,7 +25,7 @@ app.get("/api", (req: Request, res: Response) => {
 // initializeDB();
 
 app.listen(port, () => {
-  console.log(`Backend listening at http://localhost:${port}`);
+  logger.info(`Backend listening at http://localhost:${port}`);
 });
 
 app.use("/api", jobRoutes);

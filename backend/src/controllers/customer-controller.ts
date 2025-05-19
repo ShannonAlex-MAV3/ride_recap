@@ -1,30 +1,32 @@
 import { Customer } from "../@types";
+import logger from "../logger";
 import * as customerService from "../services/customer/service";
 import { Request, Response } from "express";
 
 export const getAllCustomers = async (req: Request, res: Response) => {
 
-    console.log("Start: get all the job configs.");
+  logger.info("Start: get all the job configs");
 
-    try {
-        const customers = await customerService.getAllCustomers();
+  try {
+    const customers = await customerService.getAllCustomers();
 
-        res.json(customers);
-    } catch (error) {
-        if (error instanceof Error) {
-            res.status(500).json({ message: error.message });
-        } else {
-            res.status(500).json({ message: "An unknown error occurred" });
-        }
+    res.json(customers);
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: "An unknown error occurred" });
     }
+    logger.error("Error", { message: (error as Error).message, stack: (error as Error).stack });
+  }
 
-    console.log("End: get all the job configs.");
+  logger.info("End: get all the job configs");
 
 };
 
 export const saveCustomer = async (req: Request, res: Response) => {
 
-  console.log("Start: create new customer.");
+  logger.info("Start: create new customer.");
 
   try {
     const newCustomer: Customer = req.body;
@@ -37,16 +39,16 @@ export const saveCustomer = async (req: Request, res: Response) => {
     } else {
       res.status(500).json({ message: "An unknown error occurred" });
     }
-    console.error("ERROR:", error); //TODO: for the rest
+    logger.error("Error", { message: (error as Error).message, stack: (error as Error).stack });
   }
 
-  console.log("End: create new customer.");
+  logger.info("End: create new customer.");
 
 };
 
 export const getJCustomerById = async (req: Request, res: Response) => {
 
-  console.log("Start: get customer by id: ", req.params.customerID);
+  logger.info("Start: get customer by id: ", req.params.customerID);
 
   try {
     const customerId = parseInt(req.params.customerID, 10);
@@ -62,15 +64,16 @@ export const getJCustomerById = async (req: Request, res: Response) => {
     } else {
       res.status(500).json({ message: "An unknown error occurred" });
     }
+    logger.error("Error", { message: (error as Error).message, stack: (error as Error).stack });
   }
 
-  console.log("End: get customer by id :", req.params.customerID);
+  logger.info("End: get customer by id :", req.params.customerID);
 
 }; // get customer without vehicle?
 
 export const updateCustomer = async (req: Request, res: Response) => {
 
-  console.log("Start: update customer.");
+  logger.info("Start: update customer.");
 
   try {
     const customer: Customer = req.body;
@@ -83,7 +86,8 @@ export const updateCustomer = async (req: Request, res: Response) => {
     } else {
       res.status(500).json({ message: "An unknown error occurred" });
     }
+    logger.error("Error", { message: (error as Error).message, stack: (error as Error).stack });
   }
 
-  console.log("End: update customer.");
+  logger.info("End: update customer.");
 };

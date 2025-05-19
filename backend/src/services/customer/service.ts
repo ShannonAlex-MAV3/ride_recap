@@ -14,7 +14,7 @@ export const getAllCustomers = async (): Promise<Customer[]> => {
     // },
   });
 
- logger.info(`End: Fetched ${customers.length} Customers.`);
+  logger.info(`End: Fetched ${customers.length} Customers.`);
 
   return customers;
 };
@@ -22,6 +22,8 @@ export const getAllCustomers = async (): Promise<Customer[]> => {
 export const saveCustomer = async (customer: Customer): Promise<Customer> => {
   logger.info("Start: Saving new customer.");
 
+  const seenPlates = new Set<string>();
+  
   // Be cautious of potential concurrency issues. If multiple records are being created simultaneously, this approach could lead to duplicate job codes.
   const latestCustomer = await getLatestCustomer();
 
@@ -30,11 +32,30 @@ export const saveCustomer = async (customer: Customer): Promise<Customer> => {
   const newCustomerCode = createCustomerCode(latestCustomerID);
   logger.info(`Generated customer code: ${newCustomerCode}`);
 
+  const emailTrimmed = customer.email.trim();
+
+  await validateUniqueCustomerEmail(emailTrimmed);
+
+  // Check vehicle license plates for duplicates
+  if (customer.vehicles && customer.vehicles.length > 0) {
+    for (const vehicle of customer.vehicles) {
+      const licensePlateTrimmed = vehicle.licensePlate.trim();
+
+      if (seenPlates.has(licensePlateTrimmed)) {
+        throw new Error(`Please check for duplicated License Plate Numbers '${licensePlateTrimmed}'.`);
+      }
+
+      seenPlates.add(licensePlateTrimmed);
+
+      await validateUniqueLicensePlate(licensePlateTrimmed)
+    }
+  }
+
   const newCustomer = {
     customerCode: newCustomerCode,
     firstName: customer.firstName.trim(),
     lastName: customer.lastName.trim(),
-    email: customer.email.trim(),
+    email: emailTrimmed,
     phone: customer.phone.trim(),
     address: customer.address.trim(),
     status: customer.status,
@@ -102,14 +123,50 @@ export const getCustomerById = async (
 export const updateCustomer = async (customer: Customer): Promise<Customer> => {
   logger.info("Start: Updating customer.");
 
+  const seenPlates = new Set<string>();
+
+  const customerId = customer.customerID;
+  const trimmedEmail = customer.email.trim();
+
+  await validateUniqueCustomerEmail(trimmedEmail, customerId);
+
+  if (customer.vehicles && customer.vehicles.length > 0) {
+    for (const vehicle of customer.vehicles) {
+      const trimmedPlate = vehicle.licensePlate.trim();
+
+      if (seenPlates.has(trimmedPlate)) {
+        throw new Error(`Please check for duplicated License Plate Numbers '${trimmedPlate}'.`);
+      }
+
+      seenPlates.add(trimmedPlate);
+
+      // Skip validation for existing vehicle with unchanged plate
+      if (vehicle.vehicleID) {
+        // Validate the updated ones
+        const existing = await prisma.vehicle.findUnique({
+          where: { vehicleID: vehicle.vehicleID },
+        });
+
+        if (existing && existing.licensePlate === trimmedPlate) {
+          continue; // no change in plate, skip validation
+        } else {
+          await validateUniqueLicensePlate(trimmedPlate, vehicle.vehicleID)
+        }
+      } else {
+        // Validate the new ones -- upsert
+        await validateUniqueLicensePlate(trimmedPlate)
+      }
+    }
+  }
+
   const updatedCustomer = await prisma.customer.update({
     where: {
-      customerID: customer.customerID,
+      customerID: customerId,
     },
     data: {
       firstName: customer.firstName.trim(),
       lastName: customer.lastName.trim(),
-      email: customer.email.trim(),
+      email: trimmedEmail,
       phone: customer.phone.trim(),
       address: customer.address.trim(),
       status: customer.status,
@@ -147,4 +204,36 @@ export const updateCustomer = async (customer: Customer): Promise<Customer> => {
   logger.info("End: Update customer for.", updatedCustomer.customerCode);
 
   return updatedCustomer;
+};
+
+export const validateUniqueCustomerEmail = async (email: string, excludeCustomerID?: number): Promise<void> => {
+
+  const trimmedEmail = email.trim();
+
+  const existingCustomer = await prisma.customer.findFirst({
+    where: {
+      email: trimmedEmail,
+      ...(excludeCustomerID ? { NOT: { customerID: excludeCustomerID } } : {}),
+    },
+  });
+
+  if (existingCustomer) {
+    throw new Error("A customer with this email already exists.");
+  }
+};
+
+export const validateUniqueLicensePlate = async (plate: string, excludeVehicleID?: number): Promise<void> => {
+
+  const trimmedLicense = plate.trim();
+
+  const existingVehicle = await prisma.vehicle.findFirst({
+    where: {
+      licensePlate: trimmedLicense,
+      ...(excludeVehicleID ? { NOT: { vehicleID: excludeVehicleID } } : {}),
+    },
+  });
+
+  if (existingVehicle) {
+    throw new Error(`A vehicle with license plate '${trimmedLicense}' already exists.`);
+  }
 };

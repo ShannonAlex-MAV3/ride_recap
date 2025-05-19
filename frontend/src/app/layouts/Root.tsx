@@ -1,9 +1,10 @@
-import { CustomBreadCrumb } from "@/components/nav/BreadCrumb"
-import { NavBar } from "@/components/nav/Nav"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Icon } from '@iconify-icon/react'
+import { CustomBreadCrumb } from "@/components/nav/BreadCrumb";
+import { NavBar } from "@/components/nav/Nav";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Toaster } from "@/components/ui/toaster";
+import { Icon } from "@iconify-icon/react";
 import {
   Home,
   LineChart,
@@ -11,15 +12,13 @@ import {
   Package,
   Package2,
   ShoppingCart,
-  Users
-} from "lucide-react"
-import { Link, Outlet } from "react-router-dom"
-
+  Users,
+} from "lucide-react";
+import { Link, Outlet } from "react-router-dom";
 
 const Root = () => {
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-
       {/* side bar area */}
       <div className="hidden border-r bg-muted/40 md:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
@@ -27,7 +26,12 @@ const Root = () => {
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link to="/" className="flex items-center gap-2 font-semibold">
               {/* <Package2 className="h-6 w-6" /> */}
-              <Icon icon="emojione-monotone:oncoming-automobile" width="24px" height="24px"  style={{color: "black"}} />
+              <Icon
+                icon="emojione-monotone:oncoming-automobile"
+                width="24px"
+                height="24px"
+                style={{ color: "black" }}
+              />
               <span className="">Ride Recap</span>
             </Link>
           </div>
@@ -40,10 +44,9 @@ const Root = () => {
 
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 px-4 lg:h-[60px] lg:px-6">
-
           {/* breadcrumb */}
           <CustomBreadCrumb />
-          
+
           {/* mobile nav */}
           <Sheet>
             <SheetTrigger asChild>
@@ -106,7 +109,6 @@ const Root = () => {
               </nav>
             </SheetContent>
           </Sheet>
-
         </header>
 
         {/* area which changes based on route
@@ -115,6 +117,7 @@ const Root = () => {
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <Outlet />
         </main>
+        <Toaster />
       </div>
     </div>
   );

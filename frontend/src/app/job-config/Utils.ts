@@ -23,11 +23,6 @@ export enum JobCategories {
   TW = "Tires and Wheels",
 }
 
-export enum Status {  // can move to a common place
-  ACT = "Active",
-  INA = "Inactive",
-}
-
 export const fetchJobConfig = async (): Promise<JobConfig[]> => {
   try {
     const response = await axios.get(API_URLS.getAllJobConfigs);
@@ -74,21 +69,6 @@ export const updateJob = async (formVals: any) => {
 export const getCategoryEnumValue = (category: string) => {
   return JobCategories[category as keyof typeof JobCategories];
 };
-
-export const getStatusEnumValue = (status: string) => {  // can move to a common place
-  return Status[status as keyof typeof Status];
-};
-
-export const getStatusEnumColor = (status: string) => {
-  switch (status) {
-    case 'ACT':
-      return 'default';
-    case 'INA':
-      return 'destructive';
-    default:
-      return 'outline';
-  }
-}
 
 // export const handleRowClick = (jobCode: string) => {
 //   console.log("HandleRowClick: jobCode -->", jobCode);

@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 // import client, { initializeDB } from "./config/db";
 import jobRoutes from "./routes/job-config";
+import customerRoutes from "./routes/customer";
 
 const cors =  require("cors")
 
@@ -28,3 +29,4 @@ app.listen(port, () => {
 });
 
 app.use("/api", jobRoutes);
+app.use("/api", customerRoutes);

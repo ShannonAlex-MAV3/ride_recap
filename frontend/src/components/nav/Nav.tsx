@@ -1,6 +1,6 @@
 import { NavItem } from "@/@types";
 import { Link } from "react-router-dom";
-import { Home, CarFront, Users, Cog } from "lucide-react";
+import { Home, CarFront, Users, Cog, PersonStanding } from "lucide-react";
 
 export const NavBar = () => {
   return (
@@ -34,6 +34,11 @@ export const navItems: NavItem[] = [
     icon: <CarFront className="h-4 w-4" />,
     label: "Auto Care",
     to: "/auto-care",
+  },
+  {
+    icon: <PersonStanding className="h-4 w-4" />,
+    label: "Customer",
+    to: "/customer",
   },
   {
     icon: <Cog className="h-4 w-4" />,

@@ -27,7 +27,7 @@ import {
   JobConfig,
   createJob,
   updateJob,
-} from "./Utills";
+} from "./Utils";
 import { Textarea } from "@/components/ui/textarea";
 
 const AddEditJob = () => {
@@ -53,7 +53,7 @@ const AddEditJob = () => {
     if (jobID) {
       setIsEditing(true);
       const loadJob = async () => {
-        const jobs = await fetchJobConfig();
+        const jobs = await fetchJobConfig(); //TODO
         const jobToEdit = jobs.find((j) => j.jobID === Number(jobID));
         if (jobToEdit) {
           setJobData(jobToEdit);
@@ -81,6 +81,14 @@ const AddEditJob = () => {
     if (isEditing) {
       const updatedJob = await updateJob(updateRQ);
       setJobData(updatedJob);
+
+      form.reset({
+        jobCode: jobToEdit.jobCode,
+        jobName: jobToEdit.jobName,
+        description: jobToEdit.description,
+        category: jobToEdit.category,
+        status: jobToEdit.status,
+      });
     } else {
       const newJob = await createJob(updateRQ);
       navigate(`/job-config/${newJob.jobID}`);
@@ -166,7 +174,7 @@ const AddEditJob = () => {
                   <FormControl>
                     <Select {...field} onValueChange={field.onChange}>
                       <SelectTrigger className="w-4/5">
-                        <SelectValue placeholder="" />
+                        <SelectValue placeholder="Select Job Category" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="GM">General Maintenance</SelectItem>
@@ -206,7 +214,7 @@ const AddEditJob = () => {
                   <FormControl>
                     <Select {...field} onValueChange={field.onChange}>
                       <SelectTrigger className="w-4/5">
-                        <SelectValue placeholder="" />
+                        <SelectValue placeholder="Select status" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="ACT">Active</SelectItem>

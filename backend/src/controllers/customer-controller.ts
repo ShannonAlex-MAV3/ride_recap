@@ -28,7 +28,7 @@ export const saveCustomer = async (req: Request, res: Response) => {
 
   try {
     const newCustomer: Customer = req.body;
-    const customer = await customerService.saveCustomer(newCustomer);
+    const customer = await customerService.saveCustomer(newCustomer); //TODO custom validation
 
     res.status(201).json(customer);
   } catch (error) {
@@ -37,6 +37,7 @@ export const saveCustomer = async (req: Request, res: Response) => {
     } else {
       res.status(500).json({ message: "An unknown error occurred" });
     }
+    console.error("ERROR:", error); //TODO: for the rest
   }
 
   console.log("End: create new customer.");

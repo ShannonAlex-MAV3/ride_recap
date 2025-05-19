@@ -5,6 +5,8 @@ import AddEditJob from "./app/job-config/AddEdit";
 import JobConfigBase from "./app/job-config/JobConfig";
 import Root from "./app/layouts/Root";
 import Wip from "./app/wip/Wip";
+import CustomerBase from "./app/customer/Customer";
+import AddEditCustomer from "./app/customer/AddEdit";
 
 const router = createBrowserRouter([
   {
@@ -38,6 +40,24 @@ const router = createBrowserRouter([
           {
             path: "new",
             element: <AddEditJob />,
+          },
+        ],
+      },
+      {
+        path: "/customer",
+        element: <Outlet />,
+        children: [
+          {
+            path: "",
+            element: <CustomerBase />,
+          },
+          {
+            path: "new",
+            element: <AddEditCustomer />,
+          },
+          {
+            path: ":customerID",
+            element: <AddEditCustomer />,
           },
         ],
       },

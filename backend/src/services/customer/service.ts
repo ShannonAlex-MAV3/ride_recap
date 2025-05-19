@@ -5,92 +5,95 @@ import { createCustomerCode } from "../customer/support"
 const prisma = new PrismaClient();
 
 export const getAllCustomers = async (): Promise<Customer[]> => {
-    console.log("Start: Fetching all Customers.");
+  console.log("Start: Fetching all Customers.");
 
-    const customers = await prisma.customer.findMany({
-        include: {
-            vehicles: true,
-        },
-    });
+  const customers = await prisma.customer.findMany({
+    // include: {
+    //   vehicles: true,
+    // },
+  });
 
-    console.log(`End: Fetched ${customers.length} Customers.`);
+  console.log(`End: Fetched ${customers.length} Customers.`);
 
-    return customers;
+  return customers;
 };
 
 export const saveCustomer = async (customer: Customer): Promise<Customer> => {
-    console.log("Start: Saving new job configuration.");
+  console.log("Start: Saving new customer.");
 
-    // Be cautious of potential concurrency issues. If multiple records are being created simultaneously, this approach could lead to duplicate job codes.
-    const latestCustomer = await getLatestCustomer();
+  // Be cautious of potential concurrency issues. If multiple records are being created simultaneously, this approach could lead to duplicate job codes.
+  const latestCustomer = await getLatestCustomer();
 
-    const latestCustomerID = latestCustomer?.customerID || 0;
+  const latestCustomerID = latestCustomer?.customerID || 0;
 
-    const newCustomerCode = createCustomerCode(latestCustomerID);
-    console.log(`Generated customer code: ${newCustomerCode}`);
+  const newCustomerCode = createCustomerCode(latestCustomerID);
+  console.log(`Generated customer code: ${newCustomerCode}`);
 
-    const newCustomer = {
-        customerCode: newCustomerCode,
-        firstName: customer.firstName.trim(),
-        lastName: customer.lastName.trim(),
-        email: customer.email.trim(),
-        phone: customer.phone.trim(),
-        address: customer.address.trim(),
-        status: customer.status,
-    };
+  const newCustomer = {
+    customerCode: newCustomerCode,
+    firstName: customer.firstName.trim(),
+    lastName: customer.lastName.trim(),
+    email: customer.email.trim(),
+    phone: customer.phone.trim(),
+    address: customer.address.trim(),
+    status: customer.status,
+  };
 
-    let newVehicles: Vehicle[] = [];
+  let newVehicles: Vehicle[] = [];
 
-    if (customer.vehicles && customer.vehicles.length > 0) {
-        newVehicles = customer.vehicles.map(vehicle => ({
-            licensePlate: vehicle.licensePlate.trim(),
-            make: vehicle.make.trim(),
-            model: vehicle.model.trim(),
-            year: vehicle.year,
-            color: vehicle.color.trim(),
-            status: vehicle.status,
-        }));
-    }
+  if (customer.vehicles && customer.vehicles.length > 0) {
+    newVehicles = customer.vehicles.map(vehicle => ({
+      licensePlate: vehicle.licensePlate.trim(),
+      make: vehicle.make.trim(),
+      model: vehicle.model.trim(),
+      year: vehicle.year,
+      color: vehicle.color.trim(),
+      status: vehicle.status,
+    }));
+  }
 
-    const savedCustomer = await prisma.customer.create({
-        data: {
-            ...newCustomer,
-            vehicles: {
-                create: newVehicles,
-            },
-        },
-        include: { vehicles: true }, // Optional, if you want vehicles in the response
-    });
+  const savedCustomer = await prisma.customer.create({
+    data: {
+      ...newCustomer,
+      vehicles: {
+        create: newVehicles,
+      },
+    },
+    include: { vehicles: true }, // Optional, if you want vehicles in the response
+  });
 
-    console.log("End: Saved new job configuration.", savedCustomer);
+  console.log("End: Saved new customer.", savedCustomer);
 
-    return savedCustomer;
+  return savedCustomer;
 };
 
 export const getLatestCustomer = async (): Promise<Customer | null> => {
-    console.log("Start: Fetching latest Customer.");
+  console.log("Start: Fetching latest Customer.");
 
-    const latestCustomer = await prisma.customer.findFirst({
-        orderBy: { customerID: "desc" },
-    });
+  const latestCustomer = await prisma.customer.findFirst({
+    orderBy: { customerID: "desc" },
+  });
 
-    console.log("End: Fetched latest Customer.", latestCustomer);
+  console.log("End: Fetched latest Customer.", latestCustomer);
 
-    return latestCustomer;
+  return latestCustomer;
 };
 
 export const getCustomerById = async (
   customerID: number
 ): Promise<Customer | null> => {
-  console.log(`Start: Fetching job configuration by ID: ${customerID}`);
+  console.log(`Start: Fetching customer by ID: ${customerID}`);
 
   const customer = await prisma.customer.findUnique({
     where: {
       customerID: customerID,
     },
+    include: {
+      vehicles: true,
+    },
   });
 
-  console.log(`End: Fetched job configuration: ${customer}`);
+  console.log(`End: Fetched customer: ${customer}`);
 
   return customer;
 };
@@ -109,6 +112,7 @@ export const updateCustomer = async (customer: Customer): Promise<Customer> => {
       phone: customer.phone.trim(),
       address: customer.address.trim(),
       status: customer.status,
+      updatedAt: new Date(),
       vehicles: {
         upsert: customer.vehicles?.map(vehicle => ({
           where: {
@@ -121,6 +125,7 @@ export const updateCustomer = async (customer: Customer): Promise<Customer> => {
             year: vehicle.year,
             color: vehicle.color.trim(),
             status: vehicle.status,
+            updatedAt: new Date(),
           },
           create: {
             licensePlate: vehicle.licensePlate.trim(),

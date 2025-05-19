@@ -8,3 +8,5 @@ router.get("/customers", customerController.getAllCustomers);
 router.get("/customers/:customerID", customerController.getJCustomerById);
 router.post("/customers/save", customerController.saveCustomer);
 router.put("/customers/update", customerController.updateCustomer);
+
+export default router;

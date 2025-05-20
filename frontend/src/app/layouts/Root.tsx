@@ -3,7 +3,6 @@ import { NavBar } from "@/components/nav/Nav";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Toaster } from "@/components/ui/toaster";
 import { Icon } from "@iconify-icon/react";
 import {
   Home,
@@ -15,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import { Link, Outlet } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 
 const Root = () => {
   return (
@@ -117,7 +117,7 @@ const Root = () => {
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <Outlet />
         </main>
-        <Toaster />
+        <ToastContainer />
       </div>
     </div>
   );

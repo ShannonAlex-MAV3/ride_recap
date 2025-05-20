@@ -7,6 +7,8 @@ import Root from "./app/layouts/Root";
 import Wip from "./app/wip/Wip";
 import CustomerBase from "./app/customer/Customer";
 import AddEditCustomer from "./app/customer/AddEdit";
+import cog from "../../frontend/src/assets/cog.svg";
+import garage from "/car-repair.png";
 
 const router = createBrowserRouter([
   {
@@ -23,7 +25,22 @@ const router = createBrowserRouter([
       },
       {
         path: "/users",
-        element: <>Users</>,
+        element: (
+          <>
+      <div className="w-full flex flex-col justify-center item-center">
+        <div className="flex justify-center">
+          <a href="#" target="_blank">
+            <img src={garage} className="logo" alt="Vite logo" />
+          </a>
+          <a href="" target="_blank">
+            <img src={cog} className="logo react" alt="React logo" />
+          </a>
+        </div>
+        <h1 className="text-black">Ride Recap - Users</h1>
+        <p className="read-the-docs">Work in Progress</p>
+      </div>
+    </>
+        ),
       },
       {
         path: "/job-config",

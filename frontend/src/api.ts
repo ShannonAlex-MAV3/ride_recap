@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:5000/api";
+export const BASE_URL = "http://localhost:5000/api";
 
 export const API_URLS = {
     // Job-Config URLS
@@ -7,8 +7,8 @@ export const API_URLS = {
     updateJobConfig: `${BASE_URL}/job-configs/update`,
 
     // Customer URLS
-    getAllCustomers: `${BASE_URL}/customers`,
-    saveCustomer: `${BASE_URL}/customers/save`,
+    getAllCustomers: `/customers`,
+    saveCustomer: `/customers/save`,
     updateCustomer: `${BASE_URL}/customers/update`,
     getJCustomerById: (customerID: number) => `${BASE_URL}/customers/${customerID}`,
 }

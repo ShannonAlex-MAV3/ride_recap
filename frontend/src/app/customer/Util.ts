@@ -2,6 +2,7 @@ import { API_URLS } from "@/api";
 import axios from "axios";
 import { z } from "zod";
 import { toast } from "@/hooks/use-toast";
+import apiService from "@/services/api-service";
 
 export interface Customer {
   customerID: number;
@@ -49,19 +50,20 @@ export const vehicleFormSchema = z.object({
 });
 
 export const fetchCustomers = async (): Promise<Customer[]> => {
-  try {
-    const response = await axios.get(API_URLS.getAllCustomers);
-    return response.data as Customer[];
-  } catch (error) {
-    console.error("Error fetching customers:", error);
-    const message =
-      error.response?.data?.message || "Something went wrong while fetching the customers.";
-    toast({
-      description: message,
-      variant: "destructive",
-    });
-    return [];
-  }
+  const response = await apiService.get(
+    `/customers`,
+    {
+        toast: {
+            enabled: true,
+            loading: {
+              message: 'Fetching Customers...',
+            },
+            error: {
+              message: 'Failed to fetch Customers',
+            }
+        }
+    })
+  return response;
 };
 
 export const getCustomerByID = async (customerID: number): Promise<Customer | null> => {
@@ -82,24 +84,21 @@ export const getCustomerByID = async (customerID: number): Promise<Customer | nu
 
 export const createCustomer = async (formVals: any) => {
 
-  try {
-    const response = await axios.post(API_URLS.saveCustomer, formVals);
-    toast({
-      description: "Customer created successfully.",
-      variant: "success",
-    });
-    const customerData = response.data;
-    return customerData;
-  } catch (error) {
-    console.error("Create customer error:", error);
-    const message =
-      error.response?.data?.message || "Something went wrong while creating the customer.";
-    toast({
-      description: message,
-      variant: "destructive",
-    });
-    return null;
-  }
+  const response = await apiService.post(
+    API_URLS.saveCustomer,
+    formVals,
+    {
+        toast: {
+            enabled: true,
+            loading: {
+              message: 'Creating Customer...',
+            },
+            success: {
+              message: 'Customer created Successfully',
+            },
+        }
+    })
+  return response;
 
 };
 

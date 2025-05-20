@@ -1,4 +1,5 @@
 import InfoTotalCards from "./InfoTotalCards";
+import JobTrendPiePanel from "./MostPopularJobsPie";
 import UpcomingMaintenanceTable from "./UpcomingMaintainanceTable";
 
 const InfoBase = () => {
@@ -13,9 +14,12 @@ const InfoBase = () => {
 
         {/* Right side: Single right panel */}
         <div className="w-1/4">
-          <div className="bg-gray-100 p-4 rounded shadow h-full">
-            <h2 className="text-lg font-semibold">Right Panel</h2>
+          {/* <div className="bg-gray-100 p-4 rounded shadow h-full"> */}
+          <div className="flex-1 space-y-4">
+            {/* <h2 className="text-lg font-semibold">Right Panel</h2> */}
             {/* Right panel content goes here */}
+            <JobTrendPiePanel />
+            <JobTrendPiePanel />
           </div>
         </div>
       </div>

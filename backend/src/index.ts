@@ -3,9 +3,10 @@ import dotenv from "dotenv";
 // import client, { initializeDB } from "./config/db";
 import jobRoutes from "./routes/job-config";
 import customerRoutes from "./routes/customer";
+import dashboardRoutes from "./routes/dashboard";
 import logger from "./logger";
 
-const cors =  require("cors")
+const cors = require("cors")
 
 // Load environment variables from .env file
 dotenv.config();
@@ -30,3 +31,4 @@ app.listen(port, () => {
 
 app.use("/api", jobRoutes);
 app.use("/api", customerRoutes);
+app.use("/api", dashboardRoutes);

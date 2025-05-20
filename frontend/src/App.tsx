@@ -9,6 +9,7 @@ import CustomerBase from "./app/customer/Customer";
 import AddEditCustomer from "./app/customer/AddEdit";
 import cog from "../../frontend/src/assets/cog.svg";
 import garage from "/car-repair.png";
+import Home from "./app/home/Home";
 
 const router = createBrowserRouter([
   {
@@ -17,7 +18,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/home",
-        element: <Wip />,
+        element: <Home />,
       },
       {
         path: "/auto-care",

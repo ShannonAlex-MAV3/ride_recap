@@ -10,7 +10,13 @@ const prisma = new PrismaClient();
 export const getAllJobConfigs = async (): Promise<JobConfig[]> => {
   logger.info("Start: Fetching all job configurations.");
 
-  const allJobs = await prisma.jobConfig.findMany();
+  const allJobs = await prisma.jobConfig.findMany({
+    orderBy: [
+      {
+        jobID: 'asc',
+      },
+    ],
+  });
 
   logger.info(`End: Fetched ${allJobs.length} job configurations.`);
 

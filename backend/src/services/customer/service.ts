@@ -9,6 +9,11 @@ export const getAllCustomers = async (): Promise<Customer[]> => {
   logger.info("Start: Fetching all Customers");
 
   const customers = await prisma.customer.findMany({
+    orderBy: [
+      {
+        customerID: 'asc',
+      },
+    ],
     // include: {
     //   vehicles: true,
     // },
@@ -23,7 +28,7 @@ export const saveCustomer = async (customer: Customer): Promise<Customer> => {
   logger.info("Start: Saving new customer.");
 
   const seenPlates = new Set<string>();
-  
+
   // Be cautious of potential concurrency issues. If multiple records are being created simultaneously, this approach could lead to duplicate job codes.
   const latestCustomer = await getLatestCustomer();
 

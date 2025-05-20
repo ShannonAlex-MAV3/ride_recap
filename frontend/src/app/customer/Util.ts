@@ -1,7 +1,5 @@
 import { API_URLS } from "@/api";
-import axios from "axios";
 import { z } from "zod";
-import { toast } from "@/hooks/use-toast";
 import apiService from "@/services/api-service";
 
 export interface Customer {
@@ -50,36 +48,35 @@ export const vehicleFormSchema = z.object({
 });
 
 export const fetchCustomers = async (): Promise<Customer[]> => {
-  const response = await apiService.get(
-    `/customers`,
+  const response = await apiService.get(API_URLS.getAllCustomers,
     {
-        toast: {
-            enabled: true,
-            loading: {
-              message: 'Fetching Customers...',
-            },
-            error: {
-              message: 'Failed to fetch Customers',
-            }
+      toast: {
+        enabled: true,
+        loading: {
+          message: 'Fetching Customers...',
+        },
+        error: {
+          message: 'Failed to fetch Customers',
         }
+      }
     })
   return response;
 };
 
 export const getCustomerByID = async (customerID: number): Promise<Customer | null> => {
-  try {
-    const response = await axios.get(API_URLS.getJCustomerById(customerID));
-    return response.data as Customer;
-  } catch (error) {
-    console.error("Error fetching customers:", error);
-    const message =
-      error.response?.data?.message || "Something went wrong while fetching the customer.";
-    toast({
-      description: message,
-      variant: "destructive",
-    });
-    return null;
-  }
+  const response = await apiService.get(API_URLS.getJCustomerById(customerID),
+    {
+      toast: {
+        enabled: true,
+        loading: {
+          message: 'Fetching Customer...',
+        },
+        error: {
+          message: 'Failed to fetch Customer',
+        }
+      }
+    })
+  return response;
 };
 
 export const createCustomer = async (formVals: any) => {
@@ -88,37 +85,33 @@ export const createCustomer = async (formVals: any) => {
     API_URLS.saveCustomer,
     formVals,
     {
-        toast: {
-            enabled: true,
-            loading: {
-              message: 'Creating Customer...',
-            },
-            success: {
-              message: 'Customer created Successfully',
-            },
-        }
+      toast: {
+        enabled: true,
+        loading: {
+          message: 'Creating Customer...',
+        },
+        success: {
+          message: 'Customer created Successfully.',
+        },
+      }
     })
   return response;
 
 };
 
 export const updateCustomer = async (formVals: any) => {
-  try {
-    const response = await axios.put(API_URLS.updateCustomer, formVals);
-    toast({
-      description: "Customer updated successfully.",
-      variant: "success",
-    });
-    const customerData = response.data;
-    return customerData;
-  } catch (error) {
-    console.error("Create customer error:", error);
-    const message =
-      error.response?.data?.message || "Something went wrong while updating the customer.";
-    toast({
-      description: message,
-      variant: "destructive",
-    });
-    return null;
-  }
+
+  const response = await apiService.put(API_URLS.updateCustomer, formVals,
+    {
+      toast: {
+        enabled: true,
+        loading: {
+          message: 'Updating Customer...',
+        },
+        success: {
+          message: 'Customer updated Successfully.',
+        },
+      }
+    })
+  return response;
 };

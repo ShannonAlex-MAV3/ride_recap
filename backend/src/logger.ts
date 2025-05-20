@@ -5,7 +5,8 @@ const logger = createLogger({
   level: 'info',
   format: format.combine(
     format.timestamp(),
-    format.printf(({ timestamp, level, message }) => `${timestamp} [${level.toUpperCase()}] ${message}`)
+    format.errors({ stack: true }), // capture stack traces
+    format.printf(({ timestamp, level, message, stack }) => `${timestamp} [${level.toUpperCase()}] ${stack || message}`)
   ),
   transports: [new transports.Console()],
 });

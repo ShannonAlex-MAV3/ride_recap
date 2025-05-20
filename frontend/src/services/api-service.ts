@@ -224,7 +224,10 @@ class AxiosService {
     if (toastConfig?.enabled && toastConfig.loading) {
       toastId = toast.loading(
         toastConfig.loading.message || 'Loading...',
-        toastConfig.loading.options
+        {
+          ...toastConfig.loading.options,
+          className: "bg-black text-white",
+        }
       );
     }
 
@@ -266,8 +269,6 @@ class AxiosService {
         return response.data;
       })
       .catch(error => {
-        console.log('Error:', error);
-        console.log("sdsdsd: ", toastId && (toastConfig?.error || error.message) )
         // Show error toast if configured
         if (toastId && (toastConfig?.error || error.message)) {
           const errorMessage = (error as ApiErrorResponse).message || toastConfig?.error?.message ||
@@ -278,6 +279,7 @@ class AxiosService {
             type: 'error',
             isLoading: false,
             position: 'top-right',
+            className: "bg-black text-white",
             autoClose: toastConfig?.error?.options?.autoClose ?? 3000
           });
         } else if (toastId) {

@@ -1,6 +1,6 @@
 import { z } from "zod";
-import axios from "axios";
 import { API_URLS } from "@/api";
+import apiService from "@/services/api-service";
 
 // all the functions that are used in job-config
 export interface JobConfig {
@@ -24,13 +24,19 @@ export enum JobCategories {
 }
 
 export const fetchJobConfig = async (): Promise<JobConfig[]> => {
-  try {
-    const response = await axios.get(API_URLS.getAllJobConfigs);
-    return response.data as JobConfig[];
-  } catch (error) {
-    console.error("Error fetching job configurations:", error);
-    return [];
-  }
+  const response = await apiService.get(API_URLS.getAllJobConfigs,
+    {
+      toast: {
+        enabled: true,
+        loading: {
+          message: 'Fetching Job Configurations...',
+        },
+        error: {
+          message: 'Failed to fetch Job Configurations',
+        }
+      }
+    })
+  return response;
 };
 
 export const formSchema = z.object({
@@ -48,30 +54,39 @@ export const formSchema = z.object({
 
 export const createJob = async (formVals: any) => {
 
-  const response = await axios.post(API_URLS.saveJobConfig, formVals);
-
-  const jobData = response.data;
-  return jobData;
-
-  // Assuming `jobID` is returned in `jobData`
-  // navigate(`/job-config/${jobData.jobID}`);
+  const response = await apiService.post(
+    API_URLS.saveJobConfig,
+    formVals,
+    {
+      toast: {
+        enabled: true,
+        loading: {
+          message: 'Creating Job Configuration...',
+        },
+        success: {
+          message: 'Job Configuration created Successfully.',
+        },
+      }
+    })
+  return response;
 };
 
 export const updateJob = async (formVals: any) => {
-  console.log("updateJob Form vals: ", formVals);
-
-  const response = await axios.put(API_URLS.updateJobConfig, formVals);
-
-  const jobData = response.data;
-  return jobData;
+  const response = await apiService.put(API_URLS.updateJobConfig, formVals,
+    {
+      toast: {
+        enabled: true,
+        loading: {
+          message: 'Updating Job Configuration...',
+        },
+        success: {
+          message: 'Job Configuration updated Successfully.',
+        },
+      }
+    })
+  return response;
 };
 
 export const getCategoryEnumValue = (category: string) => {
   return JobCategories[category as keyof typeof JobCategories];
 };
-
-// export const handleRowClick = (jobCode: string) => {
-//   console.log("HandleRowClick: jobCode -->", jobCode);
-//   //   const navigate = useNavigate();
-//   //   navigate(`/jobs/${jobCode}`); // Navigate to the Job Detail page
-// };

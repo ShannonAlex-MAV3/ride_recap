@@ -1,43 +1,25 @@
 import { z } from "zod";
 import { API_URLS } from "@/api";
 import apiService from "@/services/api-service";
+import { JobCategories } from "@/@types";
 
 // all the functions that are used in job-config
-export interface JobConfig {
-  jobID: number;
-  jobCode: string;
-  jobName: string;
-  description: string;
-  category: JobCategories;
-  status: string;
-}
 
-export enum JobCategories {
-  GM = "General Maintenance",
-  ID = "Inspections and Diagnostics",
-  ER = "Engine Repair & Maintenance",
-  BS = "Brakes and Suspension",
-  TS = "Transmission Services",
-  AC = "HVAC (Heating, Ventilation, Air Conditioning)",
-  BP = "Body and Paintwork",
-  TW = "Tires and Wheels",
-}
-
-export const fetchJobConfig = async (): Promise<JobConfig[]> => {
-  const response = await apiService.get(API_URLS.getAllJobConfigs,
-    {
-      toast: {
-        enabled: true,
-        loading: {
-          message: 'Fetching Job Configurations...',
-        },
-        error: {
-          message: 'Failed to fetch Job Configurations',
-        }
-      }
-    })
-  return response;
-};
+// export const fetchJobConfig = async (): Promise<JobConfig[]> => {
+//   const response = await apiService.get(API_URLS.getAllJobConfigs,
+//     {
+//       toast: {
+//         enabled: true,
+//         loading: {
+//           message: 'Fetching Job Configurations...',
+//         },
+//         error: {
+//           message: 'Failed to fetch Job Configurations',
+//         }
+//       }
+//     })
+//   return response;
+// };
 
 export const formSchema = z.object({
   //ToDo: understand

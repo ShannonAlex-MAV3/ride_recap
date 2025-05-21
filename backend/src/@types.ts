@@ -53,3 +53,23 @@ export interface Vehicle {
   createdAt?: Date; 
   updatedAt?: Date | null;
 }
+
+export type AutoCare = {
+  autoCareID?: number;
+  autoCareCode?: string;
+  customerID: number;
+  vehicleID: number;
+  jobID: number;
+  currentMileage: number;
+  metricConfig: AutoCareMetric[];
+  mechanic?: string;
+  status?: StatusP;
+  createdAt?: Date;
+  updatedAt?: Date | null;
+}
+
+export type AutoCareMetric = {
+  metric: string;
+  value: number;
+  nextService?: number;
+}

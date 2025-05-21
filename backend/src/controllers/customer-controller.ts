@@ -91,3 +91,28 @@ export const updateCustomer = async (req: Request, res: Response) => {
 
   logger.info("End: update customer.");
 };
+
+
+export const getVehiclesByCustomerId = async (req: Request, res: Response) => {
+  logger.info("Start: get vehicles by customer id: ", req.params.customerID);
+
+  try {
+    const customerId = parseInt(req.params.customerID, 10);
+    if (isNaN(customerId)) {
+      return res.status(400).json({ message: "Invalid Customer" });
+    }
+
+    const vehicles = await customerService.getVehiclesByCustomerId(customerId);
+    res.json(vehicles);
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(404).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: "An unknown error occurred" });
+    }
+    logger.error("Error", { message: (error as Error).message, stack: (error as Error).stack });
+  }
+
+  logger.info("End: get vehicles by customer id :", req.params.customerID);
+
+}

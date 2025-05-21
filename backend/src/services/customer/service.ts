@@ -242,3 +242,17 @@ export const validateUniqueLicensePlate = async (plate: string, excludeVehicleID
     throw new Error(`A vehicle with license plate '${trimmedLicense}' already exists.`);
   }
 };
+
+export const getVehiclesByCustomerId = async (customerID: number): Promise<Vehicle[]> => {
+  logger.info(`Start: Fetching vehicles for customer ID: ${customerID}`);
+
+  const vehicles = await prisma.vehicle.findMany({
+    where: {
+      customerID: customerID,
+    },
+  });
+
+  logger.info(`End: Fetched ${vehicles.length} vehicles for customer ID: ${customerID}`);
+
+  return vehicles;
+}

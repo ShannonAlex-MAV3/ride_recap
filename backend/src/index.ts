@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import jobRoutes from "./routes/job-config";
 import customerRoutes from "./routes/customer";
 import dashboardRoutes from "./routes/dashboard";
+import autoCareRoutes from "./routes/auto-care";
 import logger from "./logger";
 
 const cors = require("cors")
@@ -32,3 +33,4 @@ app.listen(port, () => {
 app.use("/api", jobRoutes);
 app.use("/api", customerRoutes);
 app.use("/api", dashboardRoutes);
+app.use("/api", autoCareRoutes);

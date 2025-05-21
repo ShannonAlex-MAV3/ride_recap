@@ -11,4 +11,8 @@ export const API_URLS = {
     saveCustomer: `/customers/save`,
     updateCustomer: `${BASE_URL}/customers/update`,
     getJCustomerById: (customerID: number) => `${BASE_URL}/customers/${customerID}`,
+
+    // Dashboard URLS
+    getTotalCustomersForDSB: `/dashboard/getTotalCustomers`,
+    getTotalVehiclesForDSB: `/dashboard/getTotalVehicles`,
 }

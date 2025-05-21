@@ -23,7 +23,7 @@ const routes = [
 
 export const CustomBreadCrumb = () => {
   const location = useLocation();
-  const { hash, pathname, search } = location;
+  const { pathname } = location;
 
   const pathSegments = pathname.split("/").filter(Boolean); // removes empty strings
 

@@ -43,7 +43,7 @@ const JobTrendPiePanel = () => {
                 dataKey="value"
                 label
               >
-                {trendingJobs.map((entry, index) => {
+                {trendingJobs.map((_entry, index) => {
                   const randomColor = `#${Math.floor(Math.random() * 16777215)
                     .toString(16)
                     .padStart(6, "0")}`;

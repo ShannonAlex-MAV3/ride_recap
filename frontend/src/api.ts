@@ -15,4 +15,5 @@ export const API_URLS = {
     // Dashboard URLS
     getTotalCustomersForDSB: `/dashboard/getTotalCustomers`,
     getTotalVehiclesForDSB: `/dashboard/getTotalVehicles`,
+    getTrendingJobsForDSB: `/dashboard/getMaintenanceTrend`,
 }

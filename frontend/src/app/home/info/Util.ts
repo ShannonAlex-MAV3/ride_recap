@@ -11,6 +11,11 @@ export interface TotalVehicleDSB {
   totalVehiclesForCurrentMonth: number;
 }
 
+export interface MaintenanceTrendingJobsDSB {
+    name: string;
+    value: number;
+}
+
 export const fetchTotalCustomersForDSB = async (): Promise<TotalCustomerDSB> => {
   const response = await apiService.get(API_URLS.getTotalCustomersForDSB,
     {
@@ -31,6 +36,19 @@ export const fetchTotalVehiclesForDSB = async (): Promise<TotalVehicleDSB> => {
         enabled: true,
         error: {
           message: 'Failed to  fetch Total Vehicles Info.',
+        }
+      }
+    })
+  return response;
+};
+
+export const fetchTrendingJobsForDSB = async (): Promise<MaintenanceTrendingJobsDSB[]> => {
+  const response = await apiService.get(API_URLS.getTrendingJobsForDSB,
+    {
+      toast: {
+        enabled: true,
+        error: {
+          message: 'Failed to  fetch Maintenance Job Trend Info.',
         }
       }
     })

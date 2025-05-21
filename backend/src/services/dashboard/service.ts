@@ -70,3 +70,33 @@ export const getTotalVehicles = async (): Promise<{
         totalVehiclesForCurrentMonth,
     };
 }
+
+type JobWiseAutoCare = {
+    name: string;
+    value: number;
+};
+
+export const getMaintenanceTrend = async (): Promise<JobWiseAutoCare[]> => {
+    logger.info("Start: Fetching maintenance job trend.");
+
+    const result: any[] = await prisma.$queryRaw<JobWiseAutoCare[]>
+        `
+            SELECT 
+                jb."jobName" AS "name",
+                COUNT(ac."autoCareID") AS "value"
+            FROM "AutoCare" AS ac
+            INNER JOIN "JobConfig" AS jb ON ac."jobID" = jb."jobID"
+            WHERE ac."status" = 'ACT'
+            GROUP BY ac."jobID", jb."jobName";
+        `;
+
+    // Convert BigInt values to numbers
+    const formattedResult: JobWiseAutoCare[] = result.map(row => ({
+        name: row.name,
+        value: Number(row.value),  // <-- Convert here
+    }));
+
+    logger.info(`End: Fetched maintenance job trend`);
+
+    return formattedResult ?? [];
+}

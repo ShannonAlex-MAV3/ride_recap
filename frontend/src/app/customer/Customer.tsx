@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { Customer, fetchCustomers } from "./Util";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -10,22 +9,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useMasterStore } from "@/hooks/use-master-store";
 import { Pen } from "lucide-react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
 import { getStatusEnumColor, getStatusEnumValue } from "../common/Utils";
 
 const CustomerBase = () => {
-  const [customers, setCustomers] = useState<Customer[]>([]);
+  const { customers, fetchCustomers, isLoadingCustomers, customersError } = useMasterStore();
 
   useEffect(() => {
-    const loadCustomers = async () => {
-      const fetchedCustomers = await fetchCustomers();
-      setCustomers(fetchedCustomers);
-    };
-
-    loadCustomers();
-  }, []);
+    // Fetch customers if not already loaded
+    if (customers.length === 0) {
+      fetchCustomers();
+    }
+  }, [customers.length, fetchCustomers]);
 
   return (
     <>
@@ -50,8 +48,7 @@ const CustomerBase = () => {
                 <TableHead className="text-right">Status</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
-              {customers.length > 0 ? (
+            <TableBody>              {customers.length > 0 ? (
                 customers.map((customer) => (
                   <TableRow
                     key={customer.customerID}
@@ -75,10 +72,16 @@ const CustomerBase = () => {
                     </TableCell>
                   </TableRow>
                 ))
-              ) : (
+              ) : isLoadingCustomers ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center">
                     Loading...
+                  </TableCell>
+                </TableRow>
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center">
+                    {customersError ? `Error: ${customersError}` : 'No customers found'}
                   </TableCell>
                 </TableRow>
               )}

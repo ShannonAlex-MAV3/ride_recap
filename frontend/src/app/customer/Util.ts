@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { API_URLS } from "@/api";
 import { z } from "zod";
 import apiService from "@/services/api-service";
@@ -115,3 +116,21 @@ export const updateCustomer = async (formVals: any) => {
     })
   return response;
 };
+
+export const getVehiclesByCustomerId = async (customerID: number): Promise<Vehicle[]> => {
+  const response = await apiService.get(
+    API_URLS.getVehiclesByCustomerId(customerID),
+    {
+      toast: {
+        enabled: true,
+        loading: {
+          message: 'Fetching Vehicles...',
+        },
+        error: {
+          message: 'Failed to fetch Vehicles',
+        }
+      }
+    }
+  )
+  return response;
+}

@@ -22,19 +22,20 @@ import { useForm } from "react-hook-form";
 import { useParams, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import {
-  fetchJobConfig,
   formSchema,
   JobConfig,
   createJob,
   updateJob,
 } from "./Utils";
 import { Textarea } from "@/components/ui/textarea";
+import { useMasterStore } from "@/hooks/use-master-store";
 
 const AddEditJob = () => {
   const { jobID } = useParams<{ jobID: string }>();
   const [jobData, setJobData] = useState<JobConfig | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   // const [loading, setLoading] = useState(false);
+  const { jobs, fetchJobs, getJobById } = useMasterStore();
 
   const navigate = useNavigate();
 
@@ -52,9 +53,14 @@ const AddEditJob = () => {
   useEffect(() => {
     if (jobID) {
       setIsEditing(true);
+      
+      // Load the job from the store if available, otherwise fetch jobs first
       const loadJob = async () => {
-        const jobs = await fetchJobConfig(); //TODO
-        const jobToEdit = jobs.find((j) => j.jobID === Number(jobID));
+        if (jobs.length === 0) {
+          await fetchJobs();
+        }
+        
+        const jobToEdit = getJobById(Number(jobID));
         if (jobToEdit) {
           setJobData(jobToEdit);
           form.reset({
@@ -66,11 +72,12 @@ const AddEditJob = () => {
           });
         }
       };
+      
       loadJob();
     } else {
       setIsEditing(false);
     }
-  }, [jobID]);
+  }, [jobID, jobs, fetchJobs, getJobById, form]);
 
   const submitJob = async (formVals: any) => {
     const updateRQ = {

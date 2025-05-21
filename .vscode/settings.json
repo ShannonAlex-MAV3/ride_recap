@@ -1,0 +1,16 @@
+{
+    "sqltools.connections": [
+        {
+            "pgOptions": {
+                "ssl": {
+                    "rejectUnauthorized": false
+                }
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "driver": "PostgreSQL",
+            "name": "Ride reccap",
+            "connectString": "postgresql://neondb_owner:npg_OpAEs8NP1BFL@ep-lucky-moon-a4v6q1v9-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require"
+        }
+    ]
+}

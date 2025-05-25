@@ -85,3 +85,16 @@ export interface Mechanic {
   createdAt?: Date;
   updatedAt?: Date | null;
 }
+
+export type Repair = {
+  repairID?: number;
+  repairCode?: string;
+  customerID: number;
+  vehicleID: number;
+  jobID: number;
+  currentMileage: number;
+  mechanicID?: number;
+  status?: StatusP;
+  createdAt?: Date;
+  updatedAt?: Date | null;
+}

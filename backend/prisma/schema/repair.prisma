@@ -1,0 +1,12 @@
+model Repair {
+    repairID       Int       @id @default(autoincrement())
+    repairCode     String    @unique
+    customerID     Int
+    vehicleID      Int
+    jobID          Int
+    currentMileage Int
+    mechanicID       Int
+    status         StatusP   @default(ACT)
+    createdAt      DateTime  @default(now())
+    updatedAt      DateTime?
+}

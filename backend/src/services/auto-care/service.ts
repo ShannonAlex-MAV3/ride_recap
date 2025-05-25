@@ -4,8 +4,9 @@ import { generateUniqueAutoCareCode } from './support';
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
-
+// TODO: Transactional
 export const addAutoCare = async (autoCareData: any): Promise<AutoCare> => {
+  // TODO: check relational entities status!!
     logger.info("Start: Saving new Auto Care record.");
     // Generate a unique auto care code
       const autoCareCode = await generateUniqueAutoCareCode();

@@ -69,7 +69,7 @@ export const AddAutoCare = async (data: AutoCare) => {
 
 export const updateAutoCare = async (data: AutoCare) => {
   const response = await apiService.put(
-    API_URLS.updateAutoCare,
+    API_URLS.updateAutoCare(data.autoCareID!),
     data,
     {
       toast: {

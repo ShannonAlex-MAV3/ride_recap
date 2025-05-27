@@ -22,7 +22,7 @@ export const API_URLS = {
     // AutoCare URLS
     getAllAutoCares: `/auto-cares`,
     addAutoCare: `/auto-cares/save`,
-    updateAutoCare: `/auto-cares/update`,
+    updateAutoCare: (autocareID: number) => `/auto-cares/update/${autocareID}`,
     getAutoCareById: (autoCareID: number) => `/auto-cares/${autoCareID}`,
 
     // Repair URLS

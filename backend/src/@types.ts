@@ -98,3 +98,22 @@ export type Repair = {
   createdAt?: Date;
   updatedAt?: Date | null;
 }
+
+export type RepairWithDetails = {
+  repairID: number;
+  repairCode: string;
+  customerID: number;
+  firstName: string;
+  lastName: string; 
+  customerCode: string; 
+  vehicleID: number;
+  licensePlate: string;
+  jobID: number;
+  jobCode: string;
+  jobName: string;
+  currentMileage: number;
+  mechanicID: number;
+  status?: StatusP;
+  createdAt?: Date;
+  updatedAt?: Date | null;
+}

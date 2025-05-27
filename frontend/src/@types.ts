@@ -65,3 +65,61 @@ export enum JobCategories {
   BP = "Body and Paintwork",
   TW = "Tires and Wheels",
 }
+
+export interface Repair {
+  repairID?: number;
+  repairCode?: string;
+  customerID: number;
+  vehicleID: number;
+  jobID: number;
+  currentMileage: number;
+  mechanicID: number;
+  status: string;
+  createdAt?: Date;
+  updatedAt?: Date | null;
+}
+
+export interface JobConfig {
+  jobID: number;
+  jobCode: string;
+  jobName: string;
+  description: string;
+  category: JobCategories;
+  status: string;
+}
+
+export interface Mechanic {
+  mechanicID: number;
+  nic: string;
+  firstName: string;
+  lastName?: string | null;
+  phone?: string | null;
+  mechanicType: MechanicType;
+  status: string;
+  createdAt?: Date;
+  updatedAt?: Date | null;
+}
+
+export enum MechanicType {
+  MM = "Main Mechanic",
+  SM = 'Secondary Mechanic'
+}
+
+export type RepairWithDetails = {
+  repairID: number;
+  repairCode: string;
+  customerID: number;
+  firstName: string;
+  lastName: string; 
+  customerCode: string; 
+  vehicleID: number;
+  licensePlate: string;
+  jobID: number;
+  jobCode: string;
+  jobName: string;
+  currentMileage: number;
+  mechanicID: number;
+  status?: string;
+  createdAt?: Date;
+  updatedAt?: Date | null;
+}

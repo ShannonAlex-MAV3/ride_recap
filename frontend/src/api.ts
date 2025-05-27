@@ -11,6 +11,7 @@ export const API_URLS = {
     saveCustomer: `/customers/save`,
     updateCustomer: `${BASE_URL}/customers/update`,
     getJCustomerById: (customerID: number) => `${BASE_URL}/customers/${customerID}`,
+    getSpecificVehicleOfCustomer: (customerID: number, vehicleID: number) => `/customers/${customerID}/vehicles/${vehicleID}`,
 
     // Dashboard URLS
     getTotalCustomersForDSB: `/dashboard/getTotalCustomers`,
@@ -23,4 +24,14 @@ export const API_URLS = {
     addAutoCare: `/auto-cares/save`,
     updateAutoCare: `/auto-cares/update`,
     getAutoCareById: (autoCareID: number) => `/auto-cares/${autoCareID}`,
+
+    // Repair URLS
+    getAllRepairs: `/repair`,
+    getAllRepairsWithDetails: `/repair/getAllRepairsWithDetails`,
+    addRepair: `/repair/save`,
+    updateRepair: `/repair/update`,
+    getRepairById: (repairID: number) => `/repair/${repairID}`,
+
+    // Mechanic URLS
+    getAllMechanics: '/mechanic'
 }

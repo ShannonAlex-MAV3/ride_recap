@@ -89,3 +89,22 @@ export const updateRepair = async (req: Request, res: Response) => {
     logger.info("End: update repair by id.");
 }
 
+export const getAllRepairsWithDetails = async (req: Request, res: Response) => {
+    logger.info("Start: get all the repairs with other details");
+
+    try {
+        const repairs = await repairService.getAllRepairsWithRelationDetails();
+
+        res.json(repairs);
+    } catch (error) {
+        if (error instanceof Error) {
+            res.status(500).json({ message: error.message });
+        } else {
+            res.status(500).json({ message: "An unknown error occurred" });
+        }
+        logger.error("Error", { message: (error as Error).message, stack: (error as Error).stack });
+    }
+
+    logger.info("End: get all the repairs with other details");
+}
+

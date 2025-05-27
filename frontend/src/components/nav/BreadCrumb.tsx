@@ -19,6 +19,9 @@ const routes = [
   { path: "/customer", breadcrumb: "Customer" },
   { path: "/customer/new", breadcrumb: "New Customer" },
   { path: "/customer/:customerID", breadcrumb: "Edit Customer" },
+  { path: "/repair", breadcrumb: "Repair" },
+  { path: "/repair/new", breadcrumb: "New Repair" },
+  { path: "/repair/:repairID", breadcrumb: "Edit Repair" },
 ];
 
 export const CustomBreadCrumb = () => {

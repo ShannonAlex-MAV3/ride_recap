@@ -256,3 +256,23 @@ export const getVehiclesByCustomerId = async (customerID: number): Promise<Vehic
 
   return vehicles;
 }
+
+export const getSpecificVehicleOfCustomer = async (customerId: number, vehicleId: number): Promise<Vehicle> => {
+  logger.info(`Start: Fetching vehicle of vehicle ID: ${vehicleId} for customer ID: ${customerId}`);
+
+  const vehicle = await prisma.vehicle.findFirst({
+    where: {
+      customerID: customerId,
+      vehicleID: vehicleId
+    },
+  });
+
+  if (!vehicle) {
+    logger.error(`Vehicle with ID: ${vehicleId} not found for customer ID: ${customerId}`);
+    throw new Error(`Vehicle not found for the given customer`);
+  }
+
+  logger.info(`End: Fetched ${vehicle.licensePlate} vehicle for customer ID: ${customerId}`);
+
+  return vehicle;
+}

@@ -3,28 +3,6 @@ import { API_URLS } from "@/api";
 import { z } from "zod";
 import apiService from "@/services/api-service";
 
-export interface Customer {
-  customerID: number;
-  customerCode: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  address: string;
-  status: string;
-  vehicles?: Vehicle[]
-}
-
-export interface Vehicle {
-  vehicleID: number;
-  licensePlate: string;
-  make: string;
-  model: string;
-  year: number;
-  color: string;
-  status: string;
-}
-
 export const customerFormSchema = z.object({
   customerCode: z.string().nullable().optional(),
   firstName: z.string().min(2).max(50),
@@ -48,21 +26,21 @@ export const vehicleFormSchema = z.object({
   }),
 });
 
-export const fetchCustomers = async (): Promise<Customer[]> => {
-  const response = await apiService.get(API_URLS.getAllCustomers,
-    {
-      toast: {
-        enabled: true,
-        loading: {
-          message: 'Fetching Customers...',
-        },
-        error: {
-          message: 'Failed to fetch Customers',
-        }
-      }
-    })
-  return response;
-};
+// export const fetchCustomers = async (): Promise<Customer[]> => {
+//   const response = await apiService.get(API_URLS.getAllCustomers,
+//     {
+//       toast: {
+//         enabled: true,
+//         loading: {
+//           message: 'Fetching Customers...',
+//         },
+//         error: {
+//           message: 'Failed to fetch Customers',
+//         }
+//       }
+//     })
+//   return response;
+// };
 
 export const getCustomerByID = async (customerID: number): Promise<Customer | null> => {
   const response = await apiService.get(API_URLS.getJCustomerById(customerID),

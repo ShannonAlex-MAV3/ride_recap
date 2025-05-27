@@ -134,3 +134,6 @@ package-lock.json
 
 # build folder
 build
+
+ride-recap-aiven.session.sql
+ride-recap-neon.session.sql

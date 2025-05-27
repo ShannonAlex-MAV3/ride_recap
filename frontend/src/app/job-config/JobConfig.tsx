@@ -1,6 +1,14 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useMasterStore } from "@/hooks/use-master-store";
 import { Pen } from "lucide-react";
 import { useEffect } from "react";
@@ -37,14 +45,18 @@ const JobConfigBase = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {" "}
               {jobs.length > 0 ? (
                 jobs.map((job) => (
-                  <TableRow key={job.jobID} className="cursor-pointer hover:bg-gray-100">
+                  <TableRow
+                    key={job.jobID}
+                    className="cursor-pointer hover:bg-gray-100"
+                  >
                     <TableCell className="font-medium">{job.jobCode}</TableCell>
                     <TableCell>{job.jobName}</TableCell>
                     <TableCell className="text-right">
-                      <Badge variant={getStatusEnumColor(job.status)}>{getStatusEnumValue(job.status)}</Badge>
+                      <Badge variant={getStatusEnumColor(job.status)}>
+                        {getStatusEnumValue(job.status)}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <Link to={`${job.jobID}`}>

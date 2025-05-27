@@ -7,10 +7,10 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import { Vehicle } from "../Util";
 import { getStatusEnumColor, getStatusEnumValue } from "@/app/common/Utils";
 import { Badge } from "@/components/ui/badge";
 import { Pen } from "lucide-react";
+import { Vehicle } from "@/@types";
 
 type VehicleBaseProps = {
   vehicles: Vehicle[];
@@ -46,7 +46,10 @@ const VehicleBase = ({ vehicles, onEditVehicle }: VehicleBaseProps) => (
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
-                <Pen  onClick={() => onEditVehicle(index)} className="h-4 w-4 hover:text-blue-500" />
+                <Pen
+                  onClick={() => onEditVehicle(index)}
+                  className="h-4 w-4 hover:text-blue-500"
+                />
               </TableCell>
             </TableRow>
           ))

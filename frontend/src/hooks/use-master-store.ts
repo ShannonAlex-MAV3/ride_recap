@@ -2,26 +2,29 @@
 import { create } from 'zustand';
 import axios from 'axios';
 import { API_URLS, BASE_URL } from '@/api';
-import { Customer } from '@/app/customer/Util';
-import { JobConfig } from '@/app/job-config/Utils';
+import { Customer, JobConfig, Mechanic } from "@/@types";
 
 // Define the state interface
 interface MasterState {
   // Data
   customers: Customer[];
   jobs: JobConfig[];
-  
+  mechanics: Mechanic[];
+
   // Loading states
   isLoadingCustomers: boolean;
   isLoadingJobs: boolean;
-  
+  isLoadingMechanics: boolean;
+
   // Error states
   customersError: string | null;
   jobsError: string | null;
-  
+  mechanicsError: string | null;
+
   // Actions
   fetchCustomers: () => Promise<void>;
   fetchJobs: () => Promise<void>;
+  fetchMechanics: () => Promise<void>;
   getCustomerById: (id: number) => Customer | undefined;
   getJobById: (id: number) => JobConfig | undefined;
   resetErrors: () => void;
@@ -32,52 +35,65 @@ export const useMasterStore = create<MasterState>((set, get) => ({
   // Initial state
   customers: [],
   jobs: [],
+  mechanics: [],
   isLoadingCustomers: false,
   isLoadingJobs: false,
+  isLoadingMechanics: false,
   customersError: null,
   jobsError: null,
-  
+  mechanicsError: null,
+
   // Actions
   fetchCustomers: async () => {
     set({ isLoadingCustomers: true, customersError: null });
-    
+
     try {
       const response = await axios.get(`${BASE_URL}${API_URLS.getAllCustomers}`);
-      console.log('Customers fetched:', response.data);
       set({ customers: response.data, isLoadingCustomers: false });
     } catch (error) {
-      console.error('Error fetching customers:', error);
-      set({ 
-        customersError: error instanceof Error ? error.message : 'Failed to fetch customers', 
-        isLoadingCustomers: false 
+      set({
+        customersError: error instanceof Error ? error.message : 'Failed to fetch customers',
+        isLoadingCustomers: false
       });
     }
   },
-  
+
   fetchJobs: async () => {
     set({ isLoadingJobs: true, jobsError: null });
-    
+
     try {
       const response = await axios.get(`${BASE_URL}${API_URLS.getAllJobConfigs}`);
-      console.log('Jobs fetched:', response.data);  
       set({ jobs: response.data, isLoadingJobs: false });
     } catch (error) {
-      console.error('Error fetching jobs:', error);
-      set({ 
-        jobsError: error instanceof Error ? error.message : 'Failed to fetch jobs', 
-        isLoadingJobs: false 
+      set({
+        jobsError: error instanceof Error ? error.message : 'Failed to fetch jobs',
+        isLoadingJobs: false
       });
     }
   },
-  
+
+  fetchMechanics: async () => {
+    set({ isLoadingMechanics: true, mechanicsError: null });
+
+    try {
+      const response = await axios.get(`${BASE_URL}${API_URLS.getAllMechanics}`);
+      set({ mechanics: response.data, isLoadingMechanics: false });
+    } catch (error) {
+      set({
+        mechanicsError: error instanceof Error ? error.message : 'Failed to fetch mechanics',
+        isLoadingMechanics: false
+      });
+    }
+  },
+
   getCustomerById: (id: number) => {
     return get().customers.find(customer => customer.customerID === id);
   },
-  
+
   getJobById: (id: number) => {
     return get().jobs.find(job => job.jobID === id);
   },
-  
+
   resetErrors: () => {
     set({ customersError: null, jobsError: null });
   }
@@ -85,14 +101,15 @@ export const useMasterStore = create<MasterState>((set, get) => ({
 
 // Export a hook to initialize data on app startup
 export const useInitializeMasterData = () => {
-  const { fetchCustomers, fetchJobs } = useMasterStore();
-  
+  const { fetchCustomers, fetchJobs, fetchMechanics } = useMasterStore();
+
   const initialize = async () => {
     await Promise.all([
       fetchCustomers(),
-      fetchJobs()
+      fetchJobs(),
+      fetchMechanics()
     ]);
   };
-  
+
   return { initialize };
 };

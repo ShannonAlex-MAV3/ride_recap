@@ -10,6 +10,8 @@ import AddEditJob from "./app/job-config/AddEdit";
 import JobConfigBase from "./app/job-config/JobConfig";
 import Root from "./app/layouts/Root";
 import garage from "/car-repair.png";
+import RepairBase from "./app/repair/Repair";
+import AddEditRepair from "./app/repair/AddEdit";
 
 const router = createBrowserRouter([
   {
@@ -35,6 +37,24 @@ const router = createBrowserRouter([
           {
             path: ":autoCareID",
             element: <AddEditAutoCare />,
+          },
+        ],
+      },
+      {
+        path: "/repair",
+        element: <Outlet />,
+        children: [
+          {
+            path: "",
+            element: <RepairBase />,
+          },
+          {
+            path: "new",
+            element: <AddEditRepair />,
+          },
+          {
+            path: ":repairID",
+            element: <AddEditRepair />,
           },
         ],
       },

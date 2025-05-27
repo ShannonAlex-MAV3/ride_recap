@@ -25,8 +25,6 @@ import {
   createCustomer,
   updateCustomer,
   getCustomerByID,
-  Customer,
-  Vehicle,
 } from "./Util";
 import { Button } from "@/components/ui/button";
 import {
@@ -46,6 +44,7 @@ import {
 } from "@/components/ui/dialog";
 import VehicleBase from "./vehicle/Vehicle";
 import { useParams, useNavigate } from "react-router-dom";
+import { Customer, Vehicle } from "@/@types";
 
 const AddEditCustomer = () => {
   const { customerID } = useParams<{ customerID: string }>();

@@ -1,4 +1,4 @@
-import { JobCategoriesP, StatusP } from "@prisma/client";
+import { JobCategoriesP, MechanicType, StatusP } from "@prisma/client";
 
 // Add backend types
 export interface JobConfig {
@@ -8,19 +8,19 @@ export interface JobConfig {
   description: string;
   category: JobCategoriesP;
   status: StatusP;
-  createdAt?: Date; 
+  createdAt?: Date;
   updatedAt?: Date | null;
 }
 
 export const JobCategories: any = {
-    [JobCategoriesP.GM]: "General Maintenance",
-    [JobCategoriesP.ID]: "Inspections and Diagnostics",
-    [JobCategoriesP.ER]: "Engine Repair & Maintenance",
-    [JobCategoriesP.BS]: "Brakes and Suspension",
-    [JobCategoriesP.TS]: "Transmission Services",
-    [JobCategoriesP.AC]: "HVAC (Heating, Ventilation, Air Conditioning)",
-    [JobCategoriesP.BP]: "Body and Paintwork",
-    [JobCategoriesP.TW]: "Tires and Wheels",
+  [JobCategoriesP.GM]: "General Maintenance",
+  [JobCategoriesP.ID]: "Inspections and Diagnostics",
+  [JobCategoriesP.ER]: "Engine Repair & Maintenance",
+  [JobCategoriesP.BS]: "Brakes and Suspension",
+  [JobCategoriesP.TS]: "Transmission Services",
+  [JobCategoriesP.AC]: "HVAC (Heating, Ventilation, Air Conditioning)",
+  [JobCategoriesP.BP]: "Body and Paintwork",
+  [JobCategoriesP.TW]: "Tires and Wheels",
 }
 
 export const Status: any = {
@@ -28,7 +28,7 @@ export const Status: any = {
   [StatusP.INA]: "Inactive",
 }
 
-export interface Customer {
+export interface Customer { // TODO update
   customerID?: number;
   customerCode?: string;
   firstName: string;
@@ -37,7 +37,7 @@ export interface Customer {
   phone: string;
   address: string;
   status: StatusP;
-  createdAt?: Date; 
+  createdAt?: Date;
   updatedAt?: Date | null;
   vehicles?: Vehicle[]
 }
@@ -50,7 +50,7 @@ export interface Vehicle {
   year: number;
   color: string;
   status: StatusP;
-  createdAt?: Date; 
+  createdAt?: Date;
   updatedAt?: Date | null;
 }
 
@@ -72,4 +72,48 @@ export type AutoCareMetric = {
   metric: string;
   value: number;
   nextService?: number;
+}
+
+export interface Mechanic {
+  mechanicID?: number;
+  nic: string;
+  firstName: string;
+  lastName?: string | null;
+  phone?: string | null;
+  mechanicType: MechanicType;
+  status: StatusP;
+  createdAt?: Date;
+  updatedAt?: Date | null;
+}
+
+export type Repair = {
+  repairID?: number;
+  repairCode?: string;
+  customerID: number;
+  vehicleID: number;
+  jobID: number;
+  currentMileage: number;
+  mechanicID?: number;
+  status?: StatusP;
+  createdAt?: Date;
+  updatedAt?: Date | null;
+}
+
+export type RepairWithDetails = {
+  repairID: number;
+  repairCode: string;
+  customerID: number;
+  firstName: string;
+  lastName: string; 
+  customerCode: string; 
+  vehicleID: number;
+  licensePlate: string;
+  jobID: number;
+  jobCode: string;
+  jobName: string;
+  currentMileage: number;
+  mechanicID: number;
+  status?: StatusP;
+  createdAt?: Date;
+  updatedAt?: Date | null;
 }

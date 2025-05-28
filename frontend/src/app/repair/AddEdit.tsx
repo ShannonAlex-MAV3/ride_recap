@@ -59,129 +59,107 @@ const AddEditRepair = () => {
       jobId: undefined,
       mechanicId: undefined,
       currentMileage: undefined,
+      total: undefined,
       status: `ACT`,
     },
     mode: "onChange",
   });
 
-  console.log("repair id:", repairID)
-
+  // Effect to fetch initial data
   useEffect(() => {
-    init();
-  }, [
-    customers.length,
-    jobs.length,
-    mechanics.length,
-    fetchCustomers,
-    fetchJobs,
-    repairID,
-    fetchMechanics,
-  ]);
+    const loadInitialData = async () => {
+      setIsLoading(true);
 
-  const watchedCustomerId = repairForm.watch("customerId");
-  // Handle fetching vehicles when customer ID changes
+      if (customers.length === 0) {
+        await fetchCustomers();
+      }
+      if (jobs.length === 0) {
+        await fetchJobs();
+      }
+      if (mechanics.length === 0) {
+        await fetchMechanics();
+      }
+
+      setIsLoading(false);
+    };
+
+    loadInitialData();
+  }, []);
+
+  // Separate effect to handle repair loading when ID changes
   useEffect(() => {
-    if (!watchedCustomerId) {
-      setVehicles([]);
-      return;
-    }
-    console.log("vehicle")
 
-    const fetchVehicles = async () => {
-      const vehicleData = await getVehiclesByCustomerId(
-        parseInt(watchedCustomerId, 10)
-      );
-      if (vehicleData && vehicleData.length > 0) {
-        setVehicles(vehicleData);
-      } else {
-        setVehicles([]);
+    if(customers.length == 0 || jobs.length == 0 || mechanics.length == 0) return;
+
+    if (!repairID) return;
+
+    const loadRepair = async () => {
+      setIsLoading(true);
+
+      try {
+        console.log("customer :",customers);
+        const response = await fetchRepairById(parseInt(repairID));
+
+        if (response) {
+          console.log("Repair fetched successfully:", response);
+          setRepair(response);
+
+          // Set other form values
+          repairForm.setValue("repairCode", response.repairCode, {
+            shouldValidate: true,
+            shouldDirty: false,
+          });
+          console.log(customers)
+          repairForm.setValue("customerId", String(response.customerID), {
+            shouldValidate: true,
+            shouldDirty: false,
+          });
+          repairForm.setValue("vehicleId", String(response.vehicleID), {
+            shouldValidate: true,
+            shouldDirty: false,
+          });
+          repairForm.setValue("jobId", String(response.jobID), {
+            shouldValidate: true,
+            shouldDirty: false,
+          });
+          repairForm.setValue("mechanicId", String(response.mechanicID), {
+            shouldValidate: true,
+            shouldDirty: false,
+          });
+          repairForm.setValue("currentMileage", response.currentMileage, {
+            shouldValidate: true,
+            shouldDirty: false,
+          });
+          repairForm.setValue("total", response.total ?? 0, {
+            shouldValidate: true,
+            shouldDirty: false,
+          });
+          // repairForm.setValue("status", response.status, {
+          //   shouldValidate: true,
+          //   shouldDirty: false,
+          // });
+
+          // Fetch vehicles in the same effect
+          const vehicleData = await getVehiclesByCustomerId(
+            response.customerID
+          );
+          if (vehicleData && vehicleData.length > 0) {
+            setVehicles(vehicleData);
+            repairForm.setValue("vehicleId", String(response.vehicleID), {
+              shouldValidate: true,
+              shouldDirty: false,
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error loading auto care:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchVehicles();
-  }, [watchedCustomerId]);
-
-  const init = async () => {
-    console.log("init - started");
-    setIsLoading(true);
-
-    // Fetch customers and jobs if they're not already loaded
-    if (customers.length === 0) {
-      await fetchCustomers();
-    }
-
-    if (jobs.length === 0) {
-      await fetchJobs();
-    }
-
-    if (mechanics.length === 0) {
-      await fetchMechanics();
-    }
-    console.log("init - !repairID");
-
-    if (!repairID) {
-      setIsLoading(false);
-      return;
-    }
-
-    console.log("init - fetchRepairById");
-
-    fetchRepairById(parseInt(repairID)).then((response) => {
-      if (response) {
-        console.log("Repair fetched successfully:", response);
-        setRepair(response);
-
-        // Reset form with string values consistently
-        const customerId = String(response.customerID);
-
-        // First set the customerId to trigger vehicle loading
-        repairForm.setValue("customerId", customerId, {
-          shouldValidate: true,
-          shouldDirty: false,
-        });
-
-        // Then fetch vehicles for this customer
-        getVehiclesByCustomerId(response.customerID).then((vehicleData) => {
-          if (vehicleData && vehicleData.length > 0) {
-            setVehicles(vehicleData);
-
-            // Only after vehicles are loaded, set the vehicleId
-            setTimeout(() => {
-              repairForm.setValue("vehicleId", String(response.vehicleID), {
-                shouldValidate: true,
-                shouldDirty: false,
-              });
-            }, 100);
-          }
-        });
-
-        // Set other form values
-        repairForm.setValue("repairCode", response.repairCode, {
-          shouldValidate: true,
-          shouldDirty: false,
-        });
-        repairForm.setValue("jobId", String(response.jobID), {
-          shouldValidate: true,
-          shouldDirty: false,
-        });
-        repairForm.setValue("mechanicId", String(response.jobID), {
-          shouldValidate: true,
-          shouldDirty: false,
-        });
-        repairForm.setValue("currentMileage", response.currentMileage, {
-          shouldValidate: true,
-          shouldDirty: false,
-        });
-        // repairForm.setValue("status", response.status, {
-        //   shouldValidate: true,
-        //   shouldDirty: false,
-        // });
-      }
-    });
-    console.log("init - end");
-
-    setIsLoading(false);
-  };
+    loadRepair();
+  }, [repairID,customers, mechanics, jobs]);
 
   const { isSubmitting, isSubmitted: isSuccess } = repairForm.formState;
   const isNew = !repair;
@@ -435,6 +413,30 @@ const AddEditRepair = () => {
                             className="w-4/5"
                             type="number"
                             placeholder="Enter current mileage"
+                            {...field}
+                            disabled={isSubmitting}
+                            min="0"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {/* Total */}
+                  <FormField
+                    control={repairForm.control}
+                    name="total"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Total{" "}
+                          <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            className="w-4/5"
+                            type="number"
+                            placeholder="Enter total"
                             {...field}
                             disabled={isSubmitting}
                             min="0"

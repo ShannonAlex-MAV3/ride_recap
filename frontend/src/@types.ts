@@ -73,6 +73,7 @@ export interface Repair {
   vehicleID: number;
   jobID: number;
   currentMileage: number;
+  total?: number;
   mechanicID: number;
   status: string;
   createdAt?: Date;

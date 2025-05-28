@@ -23,6 +23,12 @@ export const repairFormSchema = z.object({
             invalid_type_error: "Please enter a valid number",
         })
         .nonnegative("Mileage cannot be negative"),
+    total: z.coerce
+    .number({
+        required_error: "Please enter the total amount",
+        invalid_type_error: "Total must be a valid number",
+    })
+    .nonnegative("Total cannot be negative"), 
     status: z.enum(["ACT", "INA"], {
         required_error: "Please select a status",
     }).default("ACT"),

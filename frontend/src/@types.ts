@@ -123,3 +123,23 @@ export type RepairWithDetails = {
   createdAt?: Date;
   updatedAt?: Date | null;
 }
+
+export type Service = {
+  serviceID?: number;
+  serviceCode?: string;
+  customerID: number;
+  vehicleID: number;
+  jobID: number;
+  currentMileage: number;
+  metricConfig: ServiceMetrics[];
+  mechanicID?: number;
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string | null;
+}
+
+export type ServiceMetrics ={
+  metric: string;
+  value: number;
+  nextService?: number;
+}

@@ -1,17 +1,17 @@
 import { Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
 import cog from "../../frontend/src/assets/cog.svg";
 import "./App.css";
-import AddEditAutoCare from "./app/auto-care/AddEdit";
-import AutoCare from "./app/auto-care/AutoCare";
 import AddEditCustomer from "./app/customer/AddEdit";
 import CustomerBase from "./app/customer/Customer";
 import Home from "./app/home/Home";
 import AddEditJob from "./app/job-config/AddEdit";
 import JobConfigBase from "./app/job-config/JobConfig";
 import Root from "./app/layouts/Root";
-import garage from "/car-repair.png";
-import RepairBase from "./app/repair/Repair";
 import AddEditRepair from "./app/repair/AddEdit";
+import RepairBase from "./app/repair/Repair";
+import AddEditService from "./app/services/AddEditService";
+import ServiceBase from "./app/services/ServiceBase";
+import garage from "/car-repair.png";
 
 const router = createBrowserRouter([
   {
@@ -23,20 +23,20 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: "/auto-care",
+        path: "/service",
         element: <Outlet />,
         children: [
           {
             path: "",
-            element: <AutoCare />,
+            element: <ServiceBase />,
           },
           {
             path: "new",
-            element: <AddEditAutoCare />,
+            element: <AddEditService />,
           },
           {
-            path: ":autoCareID",
-            element: <AddEditAutoCare />,
+            path: ":serviceID",
+            element: <AddEditService />,
           },
         ],
       },

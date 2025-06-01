@@ -85,6 +85,9 @@ export const updateService = async (id: number, data: FormData) => {
     API_URLS.SERVICE.updateService(id),
     data,
     {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      },
       toast: {
         enabled: true,
         loading: {

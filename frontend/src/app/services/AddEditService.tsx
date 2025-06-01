@@ -142,6 +142,7 @@ const AddEditService = () => {
       } catch (error) {
         console.error("Error loading auto care:", error);
       } finally {
+        setFiles([])
         setIsLoading(false);
       }
     };
@@ -166,10 +167,10 @@ const AddEditService = () => {
   const onSubmit = async (data: FormValues) => {
     console.log("Form submitted with data:", data);
     const formData = new FormData();
-    formData.append("customerID", data.customerID);
-    formData.append("vehicleID", data.vehicleID);
-    formData.append("jobID", data.jobID);
-    formData.append("mechanicID", data.mechanicID);
+    formData.append("customerID", (isNew ? data.customerID : service.customerID.toString()) || "");
+    formData.append("vehicleID", (isNew ? data.vehicleID : service.vehicleID.toString()) || "");
+    formData.append("jobID", (isNew ? data.jobID : service.jobID.toString()) || "");
+    formData.append("mechanicID", (isNew ? data.mechanicID : service.mechanicID?.toString()) || "");
     formData.append("currentMileage", data.currentMileage?.toString() ?? "0");
     formData.append("status", "ACT");
 
@@ -186,6 +187,8 @@ const AddEditService = () => {
     files.forEach((file) => {
       formData.append("attachments", file);
     });
+
+    formData.append("attachmentsRefs", JSON.stringify(service?.attachmentRefs || []));
 
     if (isNew) addService(formData);
     else updateServiceData(formData);

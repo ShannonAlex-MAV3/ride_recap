@@ -72,7 +72,10 @@ export const updateService = async (req: Request, res: Response) => {
         if (isNaN(serviceId)) {
             return res.status(400).json({ message: "Invalid service ID" });
         }
-        const updatedService: Service = req.body;
+        const updatedService: Service = {
+            ...req.body,
+            attachments: req.files || [],
+        };
         const service = await serviceService.updateService(serviceId, updatedService);
         res.json(service);
     } catch (error) {

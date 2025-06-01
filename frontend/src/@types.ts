@@ -124,6 +124,7 @@ export type RepairWithDetails = {
   updatedAt?: Date | null;
 }
 
+
 export type Service = {
   serviceID?: number;
   serviceCode?: string;
@@ -131,15 +132,31 @@ export type Service = {
   vehicleID: number;
   jobID: number;
   currentMileage: number;
-  metricConfig: ServiceMetrics[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  maintenance: any;
   mechanicID?: number;
+  attachments?: File[];
+  attachmentRefs?: string[];
   status?: string;
   createdAt?: string;
   updatedAt?: string | null;
 }
 
-export type ServiceMetrics ={
-  metric: string;
-  value: number;
-  nextService?: number;
+export type ServiceWithDetails = {
+  serviceID?: number;
+  serviceCode?: string;
+  customerID: number;
+  firstName: string;
+  lastName: string;
+  vehicleID: number;
+  licensePlate: string;
+  make: string;
+  model: string;
+  jobID: number;
+  jobName?: string;
+  currentMileage: number;
+  mechanicID?: number;
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string | null;
 }

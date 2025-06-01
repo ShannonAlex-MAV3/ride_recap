@@ -32,8 +32,8 @@ export const navItems: NavItem[] = [
   },
   {
     icon: <CarFront className="h-4 w-4" />,
-    label: "Auto Care",
-    to: "/auto-care",
+    label: "Service",
+    to: "/service",
   },
   {
     icon: <Hammer className="h-4 w-4" />,

@@ -1,21 +1,35 @@
-import { AutoCareMetric, Service } from "@/@types";
+import { AutoCareMetric, Service, ServiceWithDetails } from "@/@types";
 import { API_URLS } from "@/api";
 import apiService from "@/services/api-service";
 import { z } from "zod";
 import { constants } from '../../constants';
 
-const metricSchema = z.object({
-  type: z.enum([constants.AUTOCARE_METRICS.TIME_PERIOD, constants.AUTOCARE_METRICS.DISTANCE_TRAVELLED], {
-    required_error: "Please select a metric type",
-  }),
-  value: z.coerce
-    .number({
-      required_error: "Please enter a value",
-      invalid_type_error: "Please enter a valid number",
-    })
-    .positive("Value must be greater than 0"),
+// Create the form schema
+const maintenanceValueSchema = z.array(z.enum(["R", "T", "C", "N", "Y"])).optional()
+
+const lubricantsSchema = z.object({
+  ENGINE_OIL: maintenanceValueSchema,
+  TRANSMISSION_OIL_AUTO_MA: maintenanceValueSchema,
+  DIFFERENTIAL_OIL_FRONT_REAR: maintenanceValueSchema,
+  POWER_STEERING_OIL: maintenanceValueSchema,
+  BRAKE_FLUID: maintenanceValueSchema,
 })
 
+const fluidsSchema = z.object({
+  CLUTCH_FLUID: maintenanceValueSchema,
+  RADIATOR_COOLANT: maintenanceValueSchema,
+  INVERTER_COOLANT: maintenanceValueSchema,
+  BATTERY_WATER: maintenanceValueSchema,
+  WINDSCREEN_CLEANER: maintenanceValueSchema,
+})
+
+const filtersSchema = z.object({
+  OIL_FILTER: maintenanceValueSchema,
+  FUEL_FILTER: maintenanceValueSchema,
+  AIR_FILTER: maintenanceValueSchema,
+  LINE_FILTER: maintenanceValueSchema,
+  CABIN_FILTER: maintenanceValueSchema,
+})
 
 export const serviceFormSchema = z.object({
   serviceCode: z.string().nullable().optional(),
@@ -31,29 +45,28 @@ export const serviceFormSchema = z.object({
   mechanicID: z
     .string({
       required_error: "Please select a mechanic",
-    })
-    .min(2, "Name must be at least 2 characters")
-    .max(50, "Name must be less than 50 characters"),
+    }),
   currentMileage: z.coerce
     .number({
       required_error: "Please enter current mileage",
       invalid_type_error: "Please enter a valid number",
     })
     .nonnegative("Mileage cannot be negative"),
-  metrics: z
-    .array(metricSchema)
-    .min(1, "At least one metric is required")
-    .refine((metrics) => {
-      const types = metrics.map((m) => m.type)
-      return new Set(types).size === types.length
-    }, "Duplicate metric types are not allowed"),
+  maintenance: z.object({
+    LUBRICANTS: lubricantsSchema,
+    FLUIDS: fluidsSchema,
+    FILTERS: filtersSchema,
+  }),
 })
 
-export const AddService = async (data: Service) => {
+export const saveService = async (data: FormData) => {
   const response = await apiService.post(
     API_URLS.SERVICE.addService,
     data,
     {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      },
       toast: {
         enabled: true,
         loading: {
@@ -67,9 +80,9 @@ export const AddService = async (data: Service) => {
   return response;
 };
 
-export const updateService = async (data: Service) => {
+export const updateService = async (id: number, data: FormData) => {
   const response = await apiService.put(
-    API_URLS.SERVICE.updateService(data.serviceID!),
+    API_URLS.SERVICE.updateService(id),
     data,
     {
       toast: {
@@ -86,7 +99,7 @@ export const updateService = async (data: Service) => {
 };
 
 
-export const fetchServices = async (): Promise<Service[]> => {
+export const fetchServices = async (): Promise<ServiceWithDetails[]> => {
   const response = await apiService.get(
     API_URLS.SERVICE.getAllServices,
     {

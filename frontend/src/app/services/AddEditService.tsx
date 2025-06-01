@@ -2,19 +2,22 @@ import { Service, Vehicle } from "@/@types";
 import FileUpload from "@/components/file-upload/FileUpload";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { useMasterStore } from "@/hooks/use-master-store";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Plus, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { z } from "zod";
 import { constants } from "../../constants";
 import { getVehiclesByCustomerId } from "../customer/Util";
-import { AddService, fetchServiceById, serviceFormSchema, updateService } from "./util";
+import { fetchServiceById, saveService, serviceFormSchema, updateService } from "./util";
 
 type FormValues = z.infer<typeof serviceFormSchema>;
 
@@ -22,11 +25,9 @@ const AddEditService = () => {
   const { serviceID } = useParams<{ serviceID: string }>();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [service, setService] = useState<Service | null>(null);
-  const { customers, jobs, fetchCustomers, fetchJobs } = useMasterStore();
+  const { customers, jobs, fetchCustomers, fetchJobs, mechanics, fetchMechanics } = useMasterStore();
   const [isLoading, setIsLoading] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
-
-  const availableMetricTypes = Object.values(constants.AUTOCARE_METRICS).map((metric) => metric);
 
   const serviceForm = useForm<FormValues>({
     resolver: zodResolver(serviceFormSchema),
@@ -37,7 +38,29 @@ const AddEditService = () => {
       jobID: undefined,
       mechanicID: "",
       currentMileage: undefined,
-      metrics: [{ type: undefined, value: undefined }],
+      maintenance: {
+        LUBRICANTS: {
+          ENGINE_OIL: [],
+          TRANSMISSION_OIL_AUTO_MA: [],
+          DIFFERENTIAL_OIL_FRONT_REAR: [],
+          POWER_STEERING_OIL: [],
+          BRAKE_FLUID: [],
+        },
+        FLUIDS: {
+          CLUTCH_FLUID: [],
+          RADIATOR_COOLANT: [],
+          INVERTER_COOLANT: [],
+          BATTERY_WATER: [],
+          WINDSCREEN_CLEANER: [],
+        },
+        FILTERS: {
+          OIL_FILTER: [],
+          FUEL_FILTER: [],
+          AIR_FILTER: [],
+          LINE_FILTER: [],
+          CABIN_FILTER: [],
+        },
+      },
     },
     mode: "onChange",
   });
@@ -52,11 +75,15 @@ const AddEditService = () => {
       if (jobs.length === 0) {
         await fetchJobs();
       }
+
+      if (mechanics.length === 0) {
+        await fetchMechanics();
+      }
       setIsLoading(false);
     };
 
     loadInitialData();
-  }, []);
+  }, [customers.length, jobs.length, fetchCustomers, fetchJobs]);
 
   // Separate effect to handle auto care loading when ID changes
   useEffect(() => {
@@ -97,17 +124,10 @@ const AddEditService = () => {
             shouldDirty: false,
           });
 
-          serviceForm.setValue(
-            "metrics",
-            response.metricConfig.map((metric) => ({
-              type: metric.metric,
-              value: metric.value,
-            })),
-            {
-              shouldValidate: true,
-              shouldDirty: false,
-            }
-          );
+          serviceForm.setValue("maintenance", response.maintenance, {
+            shouldValidate: true,
+            shouldDirty: false,
+          });
 
           // Fetch vehicles in the same effect
           const vehicleData = await getVehiclesByCustomerId(response.customerID);
@@ -127,62 +147,135 @@ const AddEditService = () => {
     };
 
     loadService();
-  }, [serviceID]);
+  }, [serviceID, serviceForm]);
+
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      const customerID = serviceForm.getValues("customerID");
+      if (customerID) {
+        const vehicleData = await getVehiclesByCustomerId(parseInt(customerID));
+        setVehicles(vehicleData);
+      } else {
+        setVehicles([]);
+      }
+    };
+
+    fetchVehicles();
+  }, [serviceForm.getValues("customerID")]);
 
   const onSubmit = async (data: FormValues) => {
     console.log("Form submitted with data:", data);
-    const rq: Service = {
-      customerID: !isNew ? service?.customerID : parseInt(data.customerID),
-      vehicleID: !isNew ? service?.vehicleID : parseInt(data.vehicleID),
-      jobID: !isNew ? service?.jobID : parseInt(data.jobID),
-      mechanicID: !isNew ? service?.mechanicID : parseInt(data.mechanicID),
-      currentMileage: data.currentMileage ?? 0,
-      metricConfig: data.metrics.map((metric) => ({
-        metric: metric.type,
-        value: metric.value ?? 0,
-      })),
-      status: "ACT",
-    };
+    const formData = new FormData();
+    formData.append("customerID", data.customerID);
+    formData.append("vehicleID", data.vehicleID);
+    formData.append("jobID", data.jobID);
+    formData.append("mechanicID", data.mechanicID);
+    formData.append("currentMileage", data.currentMileage?.toString() ?? "0");
+    formData.append("status", "ACT");
 
-    // If we're editing an existing record
-    if (!isNew && service?.serviceID) {
-      rq.serviceID = service.serviceID;
-      rq.serviceCode = service.serviceCode;
+    formData.append(
+      "maintenance",
+      JSON.stringify({
+        LUBRICANTS: data.maintenance.LUBRICANTS,
+        FLUIDS: data.maintenance.FLUIDS,
+        FILTERS: data.maintenance.FILTERS,
+      })
+    );
 
-      const response = await updateService(rq);
-      if (response) {
-        console.log("Auto Care updated successfully:", response);
-        setService(response);
-      }
-    } else {
-      // Create new Auto Care
-      const response = await AddService(rq);
-      if (response) {
-        console.log("Service added successfully:", response);
+    // Append each file individually with the same field name
+    files.forEach((file) => {
+      formData.append("attachments", file);
+    });
 
-        // Reset the form with the new serviceCode
-        serviceForm.setValue("serviceCode", response.serviceCode, {
-          shouldValidate: true,
-          shouldDirty: false,
-          shouldTouch: false,
-        });
-        setService(response);
-      }
-    }
+    if (isNew) addService(formData);
+    else updateServiceData(formData);
   };
 
-  const { fields, append, remove } = useFieldArray({
-    control: serviceForm.control,
-    name: "metrics",
-  });
-
-  const handleAddMetric = () => {
-    if (availableMetricTypes.length > 0) {
-      //@ts-expect-error error
-      append({ type: undefined, value: undefined });
-    }
+  const addService = async (formData: FormData) => {
+    const response = await saveService(formData);
+    if (!response) return;
+    serviceForm.setValue("serviceCode", response.serviceCode, {
+      shouldValidate: true,
+      shouldDirty: false,
+      shouldTouch: false,
+    });
+    setService(response);
   };
 
+  const updateServiceData = async (formData: FormData) => {
+    if (!service?.serviceID) return;
+    formData.append("serviceID", service.serviceID.toString());
+    const response = await updateService(service.serviceID, formData);
+    if (!response) return;
+    setService(response);
+  };
+
+  const handleClearSection = (sectionKey: keyof FormValues["maintenance"]) => {
+    const emptySection =
+      sectionKey === "LUBRICANTS"
+        ? {
+            ENGINE_OIL: [],
+            TRANSMISSION_OIL_AUTO_MA: [],
+            DIFFERENTIAL_OIL_FRONT_REAR: [],
+            POWER_STEERING_OIL: [],
+            BRAKE_FLUID: [],
+          }
+        : sectionKey === "FLUIDS"
+        ? {
+            CLUTCH_FLUID: [],
+            RADIATOR_COOLANT: [],
+            INVERTER_COOLANT: [],
+            BATTERY_WATER: [],
+            WINDSCREEN_CLEANER: [],
+          }
+        : {
+            OIL_FILTER: [],
+            FUEL_FILTER: [],
+            AIR_FILTER: [],
+            LINE_FILTER: [],
+            CABIN_FILTER: [],
+          };
+
+    serviceForm.setValue(`maintenance.${sectionKey}`, emptySection, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  };
+
+  const handleCheckboxChange = (
+    sectionKey: keyof FormValues["maintenance"],
+    subSectionKey: string,
+    value: string,
+    checked: boolean
+  ) => {
+    const currentMaintenance = serviceForm.getValues("maintenance");
+    const currentSection = currentMaintenance[sectionKey] as Record<string, string[]>;
+    const currentValues = currentSection[subSectionKey] || [];
+
+    const newValues = checked ? [...currentValues, value] : currentValues.filter((v) => v !== value);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    serviceForm.setValue(`maintenance.${sectionKey}.${subSectionKey}` as any, newValues, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  };
+
+  const isCheckboxChecked = (
+    sectionKey: keyof FormValues["maintenance"],
+    subSectionKey: string,
+    value: string
+  ): boolean => {
+    const currentMaintenance = serviceForm.getValues("maintenance");
+    if (!currentMaintenance || !currentMaintenance[sectionKey]) return false;
+
+    const currentSection = currentMaintenance[sectionKey] as Record<string, string[]>;
+    const currentValues = currentSection[subSectionKey] || [];
+
+    return currentValues.includes(value);
+  };
+
+  const maintenceTypes = Object.entries(constants.SERVICE_MAINTENANCE_TYPES);
   const { isSubmitting } = serviceForm.formState;
   const isNew = !service;
 
@@ -210,7 +303,7 @@ const AddEditService = () => {
                       <FormMessage />
                     </FormItem>
                   )}
-                />{" "}
+                />
                 {/* Customer Selection */}
                 <FormField
                   control={serviceForm.control}
@@ -249,7 +342,7 @@ const AddEditService = () => {
                     </FormItem>
                   )}
                 />
-                {/* Vehicle Selection */}{" "}
+                {/* Vehicle Selection */}
                 <FormField
                   control={serviceForm.control}
                   disabled={!isNew}
@@ -291,7 +384,7 @@ const AddEditService = () => {
                     </FormItem>
                   )}
                 />
-                {/* Job Selection */}{" "}
+                {/* Job Selection */}
                 <FormField
                   control={serviceForm.control}
                   name="jobID"
@@ -319,17 +412,29 @@ const AddEditService = () => {
                     </FormItem>
                   )}
                 />
-                {/* Mechanic Name */}
+                {/* Mechanic Selection */}{" "}
                 <FormField
                   control={serviceForm.control}
                   name="mechanicID"
+                  disabled={!isNew}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
                         Mechanic <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
-                        <Input placeholder="Select Mechanic" {...field} disabled={isSubmitting} />
+                        <Select disabled={isSubmitting || !isNew} onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger className="w-4/5">
+                            <SelectValue placeholder="Select a mechanic" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {mechanics?.map((mechanic) => (
+                              <SelectItem key={mechanic.mechanicID} value={mechanic.mechanicID.toString()}>
+                                {mechanic.firstName} ({mechanic.nic})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -357,122 +462,73 @@ const AddEditService = () => {
                     </FormItem>
                   )}
                 />
-                {/* Multiple Metrics */}
+                {/* Maintenance Sections */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="text-sm font-medium">
-                      Service Metrics <span className="text-red-500">*</span>
+                      Service Maintenance <span className="text-red-500">*</span>
                     </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleAddMetric}
-                      disabled={isSubmitting || availableMetricTypes.length === 0}
-                      className="h-8"
-                    >
-                      <Plus className="h-4 w-4 mr-1" /> Add Metric
-                    </Button>
                   </div>
 
-                  {fields.map((field, index) => (
-                    <div key={field.id} className="flex gap-4 items-start p-4 border rounded-md bg-slate-50">
-                      <div className="flex-1 space-y-4">
-                        {/* Metric Type */}
-                        <FormField
-                          control={serviceForm.control}
-                          name={`metrics.${index}.type`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                Metric Type <span className="text-red-500">*</span>
-                              </FormLabel>
-                              <FormControl>
-                                <Select disabled={isSubmitting} onValueChange={field.onChange} value={field.value}>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select metric type" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value={constants.AUTOCARE_METRICS.TIME_PERIOD}>
-                                      {constants.AUTOCARE_METRICS_DISPLAY.TIME_PERIOD}
-                                    </SelectItem>
-                                    <SelectItem value={constants.AUTOCARE_METRICS.DISTANCE_TRAVELLED}>
-                                      {constants.AUTOCARE_METRICS_DISPLAY.DISTANCE_TRAVELLED}
-                                    </SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        {/* Metric Value */}
-                        <FormField
-                          control={serviceForm.control}
-                          name={`metrics.${index}.value`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                {serviceForm.watch(`metrics.${index}.type`) === constants.AUTOCARE_METRICS.TIME_PERIOD
-                                  ? "Time Period (months)"
-                                  : "Distance (km)"}{" "}
-                                <span className="text-red-500">*</span>
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="number"
-                                  placeholder={
-                                    serviceForm.watch(`metrics.${index}.type`) ===
-                                    constants.AUTOCARE_METRICS.TIME_PERIOD
-                                      ? "Enter months"
-                                      : "Enter kilometers"
-                                  }
-                                  {...field}
-                                  disabled={isSubmitting}
-                                  min="0"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      {/* Remove button */}
-                      {fields.length > 1 && (
+                  {maintenceTypes.map(([sectionKey, section]) => (
+                    <div key={sectionKey} className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold text-foreground">{section.label}</h3>
                         <Button
                           type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => remove(index)}
-                          disabled={isSubmitting}
-                          className="mt-8"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleClearSection(sectionKey as keyof FormValues["maintenance"])}
                         >
-                          <X className="h-4 w-4" />
-                          <span className="sr-only">Remove metric</span>
+                          Clear Section
                         </Button>
-                      )}
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                        {section.subSections.map((subSection) => (
+                          <div key={subSection.value} className="space-y-3">
+                            <Label className="text-sm font-medium text-muted-foreground block">
+                              {subSection.label}
+                            </Label>
+                            <div className="space-y-2">
+                              {Object.entries(constants.SERVICE_MAINTENANCE_VALUES).map(([key, value]) => (
+                                <div key={key} className="flex flex-row items-center space-x-2 space-y-0">
+                                  <Checkbox
+                                    checked={isCheckboxChecked(
+                                      sectionKey as keyof FormValues["maintenance"],
+                                      subSection.value,
+                                      key
+                                    )}
+                                    onCheckedChange={(checked) =>
+                                      handleCheckboxChange(
+                                        sectionKey as keyof FormValues["maintenance"],
+                                        subSection.value,
+                                        key,
+                                        !!checked
+                                      )
+                                    }
+                                  />
+                                  <Label className="text-sm font-normal cursor-pointer flex items-center gap-1">
+                                    <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">{value}</span>
+                                  </Label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {sectionKey !== "FILTERS" && <Separator />}
                     </div>
                   ))}
-
-                  {serviceForm.formState.errors.metrics?.root && (
-                    <p className="text-sm font-medium text-destructive">
-                      {serviceForm.formState.errors.metrics.root.message}
-                    </p>
-                  )}
                 </div>
-
                 {/* File Upload */}
                 <FileUpload
-                  label="Upload Receipts"
+                  label="Upload Receipts & Attachments"
                   files={files}
                   onUploadFile={(files: File[]) => setFiles((prev) => [...prev, ...files])}
+                  fileRefs={service?.attachmentRefs || []}
                 />
-
               </CardContent>
               <CardFooter className="flex justify-end space-x-2 border-t pt-6">
-                {" "}
                 <Button
                   type="button"
                   variant="outline"
@@ -486,10 +542,29 @@ const AddEditService = () => {
                         jobID: service.jobID.toString(),
                         mechanicID: service.mechanicID?.toString(),
                         currentMileage: service.currentMileage,
-                        metrics: service.metricConfig.map((metric) => ({
-                          type: metric.metric,
-                          value: metric.value,
-                        })),
+                        maintenance: {
+                          LUBRICANTS: {
+                            ENGINE_OIL: [],
+                            TRANSMISSION_OIL_AUTO_MA: [],
+                            DIFFERENTIAL_OIL_FRONT_REAR: [],
+                            POWER_STEERING_OIL: [],
+                            BRAKE_FLUID: [],
+                          },
+                          FLUIDS: {
+                            CLUTCH_FLUID: [],
+                            RADIATOR_COOLANT: [],
+                            INVERTER_COOLANT: [],
+                            BATTERY_WATER: [],
+                            WINDSCREEN_CLEANER: [],
+                          },
+                          FILTERS: {
+                            OIL_FILTER: [],
+                            FUEL_FILTER: [],
+                            AIR_FILTER: [],
+                            LINE_FILTER: [],
+                            CABIN_FILTER: [],
+                          },
+                        },
                       });
                     } else {
                       // In add mode, completely reset
@@ -500,7 +575,29 @@ const AddEditService = () => {
                         jobID: "",
                         mechanicID: "",
                         currentMileage: undefined,
-                        metrics: [{ type: constants.AUTOCARE_METRICS.TIME_PERIOD, value: undefined }],
+                        maintenance: {
+                          LUBRICANTS: {
+                            ENGINE_OIL: [],
+                            TRANSMISSION_OIL_AUTO_MA: [],
+                            DIFFERENTIAL_OIL_FRONT_REAR: [],
+                            POWER_STEERING_OIL: [],
+                            BRAKE_FLUID: [],
+                          },
+                          FLUIDS: {
+                            CLUTCH_FLUID: [],
+                            RADIATOR_COOLANT: [],
+                            INVERTER_COOLANT: [],
+                            BATTERY_WATER: [],
+                            WINDSCREEN_CLEANER: [],
+                          },
+                          FILTERS: {
+                            OIL_FILTER: [],
+                            FUEL_FILTER: [],
+                            AIR_FILTER: [],
+                            LINE_FILTER: [],
+                            CABIN_FILTER: [],
+                          },
+                        },
                       });
                     }
                   }}

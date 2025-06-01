@@ -1,4 +1,4 @@
-import { Service } from "@/@types";
+import { ServiceWithDetails } from "@/@types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -9,7 +9,7 @@ import { getStatusEnumColor, getStatusEnumValue } from "../common/Utils";
 import { fetchServices } from "./util";
 
 const ServiceBase = () => {
-  const [services, setServices] = useState<Service[]>([]);
+  const [services, setServices] = useState<ServiceWithDetails[]>([]);
 
   const getServices = useCallback(async () => {
     const response = await fetchServices();
@@ -36,8 +36,10 @@ const ServiceBase = () => {
             <TableCaption>A list of Services.</TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead>Service Code</TableHead>
-                <TableHead className="w-[30%]">Jobs</TableHead>
+                <TableHead className="w-[10%]">Service Code</TableHead>
+                <TableHead className="w-[20%]">Job</TableHead>
+                <TableHead className="w-[30%]">Customer</TableHead>
+                <TableHead className="w-[20%]">Vehicle</TableHead>
                 <TableHead className="text-right">Status</TableHead>
               </TableRow>
             </TableHeader>
@@ -46,18 +48,12 @@ const ServiceBase = () => {
                 services.map((service) => (
                   <TableRow key={service.serviceID} className="cursor-pointer hover:bg-gray-100">
                     <TableCell className="font-medium">{service.serviceCode}</TableCell>
+                    <TableCell>{service.jobName}</TableCell>
                     <TableCell>
-                      <div className="flex flex-col">
-                        {/* TODO */}
-                        {/* {service.metricConfig?.map((config, index) => (
-                          <Card key={`config-${index}`} className="mb-2 p-4">
-                            <Label className="text-sm font-medium">
-                              {constants.service_METRICS_DISPLAY[config.metric as keyof typeof constants.services_METRICS_DISPLAY]} : {config.value}
-                            </Label>
-                            <div className="text-xs text-gray-500">{`Next Service in : ${calNextValue(config, service.currentMileage, service.createdAt!)}`}</div>
-                          </Card>
-                        ))} */}
-                      </div>
+                      {`${service.firstName} ${service.lastName}`}
+                    </TableCell>
+                    <TableCell>
+                      {`${service.licensePlate} (${service.make} ${service.model})`}
                     </TableCell>
                     <TableCell className="text-right">
                       <Badge variant={getStatusEnumColor(service.status!)}>

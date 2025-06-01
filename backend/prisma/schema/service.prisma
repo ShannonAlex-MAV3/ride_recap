@@ -1,0 +1,29 @@
+model Service {
+    serviceID     Int       @id @default(autoincrement())
+    serviceCode   String    @unique
+    customerID     Int
+    vehicleID      Int
+    jobID          Int
+    currentMileage Int
+    mechanicID     Int
+    maintenance    Json
+    status         StatusP   @default(ACT)
+    createdAt      DateTime  @default(now())
+    updatedAt      DateTime?
+
+    attachments    ServiceAttachment[]
+}
+
+
+model ServiceAttachment {
+    serviceID Int
+    fileID    Int
+    reference String
+    status    StatusP @default(ACT)
+    createdAt DateTime @default(now())
+    updatedAt DateTime?
+
+    Service   Service @relation(fields: [serviceID], references: [serviceID])
+
+    @@id([serviceID, fileID, reference])
+}

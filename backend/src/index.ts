@@ -6,6 +6,7 @@ import dashboardRoutes from "./routes/dashboard";
 import autoCareRoutes from "./routes/auto-care";
 import mechanicRoutes from "./routes/mechanic";
 import repairRoutes from "./routes/repair";
+import serviceRoutes from "./routes/service";
 import logger from "./logger";
 import { initializeStorageService } from "./services/storage/storage";
 
@@ -40,3 +41,4 @@ app.use("/api", dashboardRoutes);
 app.use("/api", autoCareRoutes);
 app.use("/api", mechanicRoutes);
 app.use("/api", repairRoutes);
+app.use("/api", serviceRoutes)

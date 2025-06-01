@@ -68,6 +68,23 @@ export type AutoCare = {
   updatedAt?: Date | null;
 }
 
+
+export type Service = {
+  serviceID?: number;
+  serviceCode?: string;
+  customerID: number;
+  vehicleID: number;
+  jobID: number;
+  currentMileage: number;
+  maintenance: any[];
+  mechanicID: number;
+  attachments?: any;
+  attachmentRefs?: string[];
+  status?: StatusP;
+  createdAt?: Date;
+  updatedAt?: Date | null;
+}
+
 export type AutoCareMetric = {
   metric: string;
   value: number;
@@ -113,6 +130,29 @@ export type RepairWithDetails = {
   jobName: string;
   currentMileage: number;
   mechanicID: number;
+  status?: StatusP;
+  createdAt?: Date;
+  updatedAt?: Date | null;
+}
+
+export type ServiceWithDetails = {
+  serviceID: number;
+  serviceCode: string;
+  customerID: number;
+  firstName: string;
+  lastName: string; 
+  customerCode: string; 
+  vehicleID: number;
+  licensePlate: string;
+  make: string;
+  model: string;
+  jobID: number;
+  jobCode: string;
+  jobName: string;
+  currentMileage: number;
+  maintenance: any[];
+  mechanicID: number;
+  attachmentRefs: string[];
   status?: StatusP;
   createdAt?: Date;
   updatedAt?: Date | null;

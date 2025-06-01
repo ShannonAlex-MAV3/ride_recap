@@ -11,6 +11,8 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import path from "path";
 import logger from "../../../logger";
+import { generateUniqueFileReference } from "../support";
+import { PrismaClient } from "@prisma/client";
 
 export interface FilebaseS3Config {
     accessKeyId: string;
@@ -19,6 +21,8 @@ export interface FilebaseS3Config {
     region?: string;
     bucketName: string;
 }
+
+const prisma = new PrismaClient();
 
 export class FilebaseS3Service {
     private s3Client: S3Client;
@@ -46,30 +50,68 @@ export class FilebaseS3Service {
         this.s3Client = new S3Client(this.config);
         this.bucketName = config.bucketName;
     }
-    /**
-     * Upload a file to a bucket
-     */
-    async uploadFile(key: string, filePath: string, options: { contentType?: string; metadata?: Record<string, string>; acl?: "private" | "public-read" | "public-read-write" | "authenticated-read" | "aws-exec-read" | "bucket-owner-read" | "bucket-owner-full-control" } = {}) {
-        try {
-            const fileContent = readFileSync(filePath);
+    // /**
+    //  * Upload a file to a bucket
+    //  */
+    // async uploadFile(key: string, filePath: string, options: { contentType?: string; metadata?: Record<string, string>; acl?: "private" | "public-read" | "public-read-write" | "authenticated-read" | "aws-exec-read" | "bucket-owner-read" | "bucket-owner-full-control" } = {}) {
+    //     try {
+    //         const fileContent = readFileSync(filePath);
 
+    //         const command = new PutObjectCommand({
+    //             Bucket: this.bucketName,
+    //             Key: key,
+    //             Body: fileContent,
+    //             ContentType: options.contentType || this.getContentType(filePath),
+    //             Metadata: options.metadata || {},
+    //             ACL: options.acl || 'private',
+    //         });
+
+    //         const result = await this.s3Client.send(command);
+    //         logger.info(`File uploaded successfully to ${this.bucketName}/${key}`);
+    //         return result;
+    //     } catch (error: any) {
+    //         logger.error(`Error uploading file to ${this.bucketName}/${key}:`, error?.message || error);
+    //         throw error;
+    //     }
+    // }
+
+    /**
+    * Upload buffer
+    */
+    async uploadData(data: any, options: { metadata?: Record<string, string>; acl?: "private" | "public-read" | "public-read-write" | "authenticated-read" | "aws-exec-read" | "bucket-owner-read" | "bucket-owner-full-control" } = {}): Promise<any> {
+        try {
+             const uuid = await generateUniqueFileReference();
+             const reference = `${uuid}.${data.originalname.split('.').pop() || ''}`;
             const command = new PutObjectCommand({
                 Bucket: this.bucketName,
-                Key: key,
-                Body: fileContent,
-                ContentType: options.contentType || this.getContentType(filePath),
+                Key: reference,
+                Body: data.buffer,
+                ContentType: data.mimetype || 'application/octet-stream',
                 Metadata: options.metadata || {},
-                ACL: options.acl || 'private',
+                ACL: options.acl || 'private'
             });
 
-            const result = await this.s3Client.send(command);
-            logger.info(`File uploaded successfully to ${this.bucketName}/${key}`);
-            return result;
+            // upload to S3
+            await this.s3Client.send(command);
+
+            logger.info(`Uploaded data to ${this.bucketName}/${reference}`);
+
+            //  save to db
+            const savedData = await prisma.file.create({
+                data: {
+                    reference: reference,
+                    filename: data.originalname,
+                    mimetype: data.mimetype || 'application/octet-stream',
+                }
+            });
+            logger.info(`File metadata saved to database with ID: ${savedData.id}`);
+            return savedData;
         } catch (error: any) {
-            logger.error(`Error uploading file to ${this.bucketName}/${key}:`, error?.message || error);
+            logger.error(`Error uploading data :`, error?.message || error);
             throw error;
         }
     }
+
 
     /**
      * Download a file from a bucket

@@ -6,7 +6,9 @@ import dashboardRoutes from "./routes/dashboard";
 import autoCareRoutes from "./routes/auto-care";
 import mechanicRoutes from "./routes/mechanic";
 import repairRoutes from "./routes/repair";
+import serviceRoutes from "./routes/service";
 import logger from "./logger";
+import { initializeStorageService } from "./services/storage/storage";
 
 const cors = require("cors")
 
@@ -21,14 +23,16 @@ app.use(cors())
 
 app.use(express.json());
 
-app.get("/api", (req: Request, res: Response) => {
-  res.json({ message: "Hello from the backend!" });
-});
 
 // initializeDB();
+initializeStorageService();
 
 app.listen(port, () => {
   logger.info(`Backend listening at http://localhost:${port}`);
+});
+
+app.get("/api", (req: Request, res: Response) => {
+  res.json({ message: "Hello from the backend!" });
 });
 
 app.use("/api", jobRoutes);
@@ -37,3 +41,4 @@ app.use("/api", dashboardRoutes);
 app.use("/api", autoCareRoutes);
 app.use("/api", mechanicRoutes);
 app.use("/api", repairRoutes);
+app.use("/api", serviceRoutes)

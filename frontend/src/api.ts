@@ -20,10 +20,10 @@ export const API_URLS = {
     getVehiclesByCustomerId: (customerID: number) => `/customers/${customerID}/vehicles`,
 
     // AutoCare URLS
-    getAllAutoCares: `/auto-cares`,
-    addAutoCare: `/auto-cares/save`,
-    updateAutoCare: (autocareID: number) => `/auto-cares/update/${autocareID}`,
-    getAutoCareById: (autoCareID: number) => `/auto-cares/${autoCareID}`,
+    // getAllAutoCares: `/auto-cares`,
+    // addAutoCare: `/auto-cares/save`,
+    // updateAutoCare: (autocareID: number) => `/auto-cares/update/${autocareID}`,
+    // getAutoCareById: (autoCareID: number) => `/auto-cares/${autoCareID}`,
 
     // Repair URLS
     getAllRepairs: `/repair`,
@@ -33,5 +33,13 @@ export const API_URLS = {
     getRepairById: (repairID: number) => `/repair/${repairID}`,
 
     // Mechanic URLS
-    getAllMechanics: '/mechanic'
+    getAllMechanics: '/mechanic',
+
+    // Service API's
+    SERVICE: {
+        getAllServices: `/service`,
+        addService: `/service/save`,
+        updateService: (serviceID: number) => `/service/update/${serviceID}`,
+        getServiceById: (serviceID: number) => `/service/${serviceID}`,
+    }
 }

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMasterStore } from "@/hooks/use-master-store";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, Loader2, Plus, X } from "lucide-react";
+import { Loader2, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
@@ -35,7 +35,7 @@ const AddEditAutoCare = () => {
       jobId: undefined,
       mechanicName: "",
       currentMileage: undefined,
-      metrics: [{ type: constants.AUTOCARE_METRICS.TIME_PERIOD, value: undefined }],
+      metrics: [{ type: undefined, value: undefined }],
     },
     mode: "onChange",
   });
@@ -177,11 +177,11 @@ const AddEditAutoCare = () => {
   const handleAddMetric = () => {
     if (availableMetricTypes.length > 0) {
       //@ts-expect-error error
-      append({ type: availableMetricTypes[0], value: undefined });
+      append({ type: undefined, value: undefined });
     }
   };
 
-  const { isSubmitting, isSubmitted: isSuccess } = autoCareForm.formState;
+  const { isSubmitting } = autoCareForm.formState;
   const isNew = !autoCare;
 
   return (
@@ -203,11 +203,7 @@ const AddEditAutoCare = () => {
                         Auto Care Code <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="This is generated automatically"
-                          {...field}
-                          value={field.value ?? ""}
-                        />
+                        <Input placeholder="This is generated automatically" {...field} value={field.value ?? ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -391,7 +387,6 @@ const AddEditAutoCare = () => {
                               </FormLabel>
                               <FormControl>
                                 <Select disabled={isSubmitting} onValueChange={field.onChange} value={field.value}>
-                                  {" "}
                                   <SelectTrigger>
                                     <SelectValue placeholder="Select metric type" />
                                   </SelectTrigger>
@@ -426,7 +421,8 @@ const AddEditAutoCare = () => {
                                 <Input
                                   type="number"
                                   placeholder={
-                                    autoCareForm.watch(`metrics.${index}.type`) === constants.AUTOCARE_METRICS.TIME_PERIOD
+                                    autoCareForm.watch(`metrics.${index}.type`) ===
+                                    constants.AUTOCARE_METRICS.TIME_PERIOD
                                       ? "Enter months"
                                       : "Enter kilometers"
                                   }
@@ -509,10 +505,12 @@ const AddEditAutoCare = () => {
                 >
                   {isSubmitting ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : isSuccess ? (
-                    <CheckCircle2 className="mr-2 h-4 w-4" />
                   ) : null}
-                  {isSubmitting ? "Submitting..." : isSuccess ? "Success!" : isNew ? "Add Auto Care" : "Update Auto Care"}
+                  {isSubmitting
+                    ? "Submitting..."
+                    : isNew
+                    ? "Add Auto Care"
+                    : "Update Auto Care"}
                 </Button>
               </CardFooter>
             </form>

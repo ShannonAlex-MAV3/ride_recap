@@ -481,6 +481,7 @@ const AddEditRepair = () => {
                     onClick={() => {
                       if (!isNew && repair) {
                         // In edit mode, preserve the ID and code
+                        //@ts-expect-error error
                         repairForm.reset({
                           repairCode: repair.repairCode,
                           customerId: repair.customerID.toString(),

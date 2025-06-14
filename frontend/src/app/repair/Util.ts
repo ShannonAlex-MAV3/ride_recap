@@ -1,4 +1,4 @@
-import { Repair, RepairWithDetails, Vehicle } from "@/@types";
+import { Repair, RepairWithDetails } from "@/@types";
 import apiService from "@/services/api-service";
 import { API_URLS } from "@/api";
 import { z } from "zod";

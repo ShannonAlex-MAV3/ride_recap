@@ -19,12 +19,6 @@ export const API_URLS = {
     getTrendingJobsForDSB: `/dashboard/getMaintenanceTrend`,
     getVehiclesByCustomerId: (customerID: number) => `/customers/${customerID}/vehicles`,
 
-    // AutoCare URLS
-    // getAllAutoCares: `/auto-cares`,
-    // addAutoCare: `/auto-cares/save`,
-    // updateAutoCare: (autocareID: number) => `/auto-cares/update/${autocareID}`,
-    // getAutoCareById: (autoCareID: number) => `/auto-cares/${autoCareID}`,
-
     // Repair URLS
     getAllRepairs: `/repair`,
     getAllRepairsWithDetails: `/repair/getAllRepairsWithDetails`,

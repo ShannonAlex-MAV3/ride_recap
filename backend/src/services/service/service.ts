@@ -29,8 +29,8 @@ export const addService = async (serviceData: any) => {
             serviceCode,
             customerID: parseInt(serviceData.customerID),
             vehicleID: parseInt(serviceData.vehicleID),
-            jobID: parseInt(serviceData.jobID),
             currentMileage: parseInt(serviceData.currentMileage) || 0,
+            serviceDate: new Date(serviceData.serviceDate),
             maintenance: JSON.parse(serviceData.maintenance),
             mechanicID: parseInt(serviceData.mechanicID),
             status: serviceData.status,
@@ -148,6 +148,7 @@ export const updateService = async (serviceID: number, serviceData: any): Promis
             data: {
               currentMileage: parseInt(serviceData.currentMileage) || 0,
               maintenance: JSON.parse(serviceData.maintenance),
+              status: serviceData.status,
               updatedAt: new Date(),
             },
             include: {
@@ -229,17 +230,13 @@ export const getAllServices = async (): Promise<ServiceWithDetails[]> => {
             c."customerCode",
             v."licensePlate",
             v."make",
-            v."model",
-            j."jobCode",
-            j."jobName"
+            v."model"
         FROM 
             "Service" s
         INNER JOIN 
             "Customer" c ON s."customerID" = c."customerID"
         INNER JOIN 
             "Vehicle" v ON s."vehicleID" = v."vehicleID"
-        INNER JOIN 
-            "JobConfig" j ON s."jobID" = j."jobID"
         ORDER BY 
             s."serviceID" DESC
     `;

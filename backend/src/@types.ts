@@ -74,7 +74,6 @@ export type Service = {
   serviceCode?: string;
   customerID: number;
   vehicleID: number;
-  jobID: number;
   currentMileage: number;
   maintenance: any[];
   mechanicID: number;

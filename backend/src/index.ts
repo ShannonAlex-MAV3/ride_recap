@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 import jobRoutes from "./routes/job-config";
 import customerRoutes from "./routes/customer";
 import dashboardRoutes from "./routes/dashboard";
-import autoCareRoutes from "./routes/auto-care";
 import mechanicRoutes from "./routes/mechanic";
 import repairRoutes from "./routes/repair";
 import serviceRoutes from "./routes/service";
@@ -38,7 +37,6 @@ app.get("/api", (req: Request, res: Response) => {
 app.use("/api", jobRoutes);
 app.use("/api", customerRoutes);
 app.use("/api", dashboardRoutes);
-app.use("/api", autoCareRoutes);
 app.use("/api", mechanicRoutes);
 app.use("/api", repairRoutes);
 app.use("/api", serviceRoutes)

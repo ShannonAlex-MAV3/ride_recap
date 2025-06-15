@@ -141,6 +141,8 @@ const AddEditService = () => {
       shouldTouch: false,
     });
     setService(response);
+
+    
   };
 
   const updateServiceData = async (formData: FormData) => {
@@ -209,7 +211,7 @@ const AddEditService = () => {
             <form onSubmit={serviceForm.handleSubmit(onSubmit)}>
               <CardContent className="space-y-6 pt-6">
                 {/* Auto Care Code */}
-                {serviceID && (
+                {service?.serviceID && (
                   <FormInput
                     form={serviceForm}
                     name="serviceCode"

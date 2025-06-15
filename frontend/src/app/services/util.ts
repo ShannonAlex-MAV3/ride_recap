@@ -177,9 +177,32 @@ export const updateService = async (id: number, data: FormData) => {
 };
 
 
-export const fetchServices = async (): Promise<ServiceWithDetails[]> => {
+export interface ServiceSearchFilters {
+  customerIds?: number[];
+  vehicleLicensePlate?: string;
+}
+
+export const fetchServices = async (filters?: ServiceSearchFilters): Promise<ServiceWithDetails[]> => {
+  // Construct URL parameters if filters are provided
+  let queryParams = '';
+  if (filters) {
+    const params = new URLSearchParams();
+    
+    // Add customer IDs if present
+    if (filters.customerIds && filters.customerIds.length > 0) {
+      filters.customerIds.forEach(id => params.append('customerIds', id.toString()));
+    }
+    
+    // Add vehicle license plate if present
+    if (filters.vehicleLicensePlate) {
+      params.append('vehicleLicensePlate', filters.vehicleLicensePlate);
+    }
+    
+    queryParams = params.toString() ? `?${params.toString()}` : '';
+  }
+  
   const response = await apiService.get(
-    API_URLS.SERVICE.getAllServices,
+    `${API_URLS.SERVICE.getAllServices}${queryParams}`,
     {
       toast: {
         enabled: true,
@@ -190,7 +213,7 @@ export const fetchServices = async (): Promise<ServiceWithDetails[]> => {
           message: 'Failed to fetch Services',
         }
       }
-    })
+    });
   return response;
 };
 

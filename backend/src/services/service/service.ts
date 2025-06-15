@@ -218,11 +218,12 @@ export const getServiceById = async (serviceID: number): Promise<Service | null>
 
 
 
-export const getAllServices = async (): Promise<ServiceWithDetails[]> => {
+export const getAllServices = async (customerIds?: number[], vehicleLicensePlate?: string): Promise<ServiceWithDetails[]> => {
     logger.info("Start: Fetching all Service records with details.");
+    logger.info(`Filters - customerIds: ${customerIds}, vehicleLicensePlate: ${vehicleLicensePlate}`);
 
-    // Using raw SQL for optimized joins to get all necessary data in a single query
-    const services = await prisma.$queryRaw`
+    // Build the SQL query with potential filters
+    let sql = `
         SELECT 
             s.*, 
             c."firstName", 
@@ -237,9 +238,27 @@ export const getAllServices = async (): Promise<ServiceWithDetails[]> => {
             "Customer" c ON s."customerID" = c."customerID"
         INNER JOIN 
             "Vehicle" v ON s."vehicleID" = v."vehicleID"
-        ORDER BY 
-            s."serviceID" DESC
+        WHERE 1=1
     `;
+
+    const params: any[] = [];
+    
+    // Add customerIds filter if provided
+    if (customerIds && customerIds.length > 0) {
+        sql += ` AND s."customerID" IN (${customerIds.map((_, i) => `$${i + 1}`).join(',')})`;
+        params.push(...customerIds);
+    }
+    
+    // Add vehicle license plate filter if provided
+    if (vehicleLicensePlate) {
+        sql += ` AND v."licensePlate" ILIKE $${params.length + 1}`;
+        params.push(`%${vehicleLicensePlate}%`);
+    }
+    
+    sql += ` ORDER BY s."serviceID" DESC`;
+    
+    // Execute the query with parameters
+    const services = await prisma.$queryRawUnsafe(sql, ...params);
 
     // Group services and their attachments
     const serviceMap = new Map();

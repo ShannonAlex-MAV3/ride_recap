@@ -9,7 +9,22 @@ import { buffer } from "stream/consumers";
 export const getAllServices = async (req: Request, res: Response) => {
     logger.info("Start: get all the services");
     try {
-        const services = await serviceService.getAllServices();
+        // Extract query parameters
+        const { customerIds, vehicleLicensePlate } = req.query;
+        
+        // Parse customer IDs if provided
+        const parsedCustomerIds = customerIds 
+            ? Array.isArray(customerIds) 
+                ? customerIds.map(id => parseInt(id as string)) 
+                : [parseInt(customerIds as string)]
+            : undefined;
+        
+        // Get services with optional filters
+        const services = await serviceService.getAllServices(
+            parsedCustomerIds, 
+            vehicleLicensePlate as string | undefined
+        );
+        
         res.json(services);
     } catch (error) {
         if (error instanceof Error) {

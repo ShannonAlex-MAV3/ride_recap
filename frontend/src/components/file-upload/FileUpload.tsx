@@ -9,6 +9,7 @@ interface FileUploadProps {
     onUploadFile: (files: File[]) => void;
     className?: string;
     fileRefs: string[];
+    disabled?: boolean;
 }
 
 export default function FileUpload(props: FileUploadProps) {
@@ -38,13 +39,13 @@ export default function FileUpload(props: FileUploadProps) {
       <div className="w-[100%] items-center gap-1.5">
         <div
           onClick={() => document.getElementById("file")?.click()}
-          className="flex items-center justify-center w-[100%] h-12 bg-gray-100 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors"
+          className={`flex items-center justify-center w-[100%] h-12 bg-gray-100 border border-gray-300 rounded-lg cursor-pointer  transition-colors duration-200 ${props.disabled ? "cursor-not-allowed opacity-50" : "hover:bg-gray-200"}`}
         >
           <Label htmlFor="file" className="flex items-center gap-2">
             <Icon icon="tabler:upload" width="24" height="24" />
             Upload File
           </Label>
-          <Input id="file" type="file" hidden={true} className="hidden" multiple={true} onChange={onUpload} />
+          <Input disabled={props.disabled} id="file" type="file" hidden={true} className="hidden" multiple={true} onChange={onUpload} />
         </div>
       </div>
     </div>

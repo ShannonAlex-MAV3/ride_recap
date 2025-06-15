@@ -2,7 +2,7 @@ import { ServiceWithDetails } from "@/@types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Pen } from "lucide-react";
+import { Eye } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getStatusEnumColor, getStatusEnumValue } from "../common/Utils";
@@ -37,9 +37,9 @@ const ServiceBase = () => {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[10%]">Service Code</TableHead>
-                <TableHead className="w-[20%]">Job</TableHead>
                 <TableHead className="w-[30%]">Customer</TableHead>
                 <TableHead className="w-[20%]">Vehicle</TableHead>
+                <TableHead className="w-[20%] text-center">Service Date</TableHead>
                 <TableHead className="text-right">Status</TableHead>
               </TableRow>
             </TableHeader>
@@ -48,12 +48,18 @@ const ServiceBase = () => {
                 services.map((service) => (
                   <TableRow key={service.serviceID} className="cursor-pointer hover:bg-gray-100">
                     <TableCell className="font-medium">{service.serviceCode}</TableCell>
-                    <TableCell>{service.jobName}</TableCell>
                     <TableCell>
                       {`${service.firstName} ${service.lastName}`}
                     </TableCell>
                     <TableCell>
                       {`${service.licensePlate} (${service.make} ${service.model})`}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {new Date(service.serviceDate).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      })}
                     </TableCell>
                     <TableCell className="text-right">
                       <Badge variant={getStatusEnumColor(service.status!)}>
@@ -61,8 +67,8 @@ const ServiceBase = () => {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Link to={`${service.customerID}`}>
-                        <Pen className="h-4 w-4 hover:text-blue-500" />
+                      <Link to={`${service.serviceID}`}>
+                        <Eye className="h-4 w-4 hover:text-blue-500" />
                       </Link>
                     </TableCell>
                   </TableRow>

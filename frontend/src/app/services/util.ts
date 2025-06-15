@@ -8,29 +8,48 @@ import { constants } from '../../constants';
 const maintenanceValueSchema = z.array(z.enum(["R", "T", "C", "N", "Y"])).optional()
 
 const lubricantsSchema = z.object({
-  ENGINE_OIL: maintenanceValueSchema,
-  TRANSMISSION_OIL_AUTO_MA: maintenanceValueSchema,
-  DIFFERENTIAL_OIL_FRONT_REAR: maintenanceValueSchema,
-  POWER_STEERING_OIL: maintenanceValueSchema,
-  BRAKE_FLUID: maintenanceValueSchema,
+  engineOil: z.object({
+    values: maintenanceValueSchema,
+    oil: z.string().optional(),
+  }),
+  transmissionOilAutoMan: z.object({
+    values: maintenanceValueSchema,
+    autoMan: z.enum(["AUTO", "MANUAL"]).optional(),
+    make: z.string().optional(),
+    type: z.string().optional(),
+  }),
+  differentialOilFrontRear: z.object({
+    values: maintenanceValueSchema,
+    make: z.string().optional(),
+    type: z.string().optional(),
+  }),
+  powerSteeringOil: z.object({
+    values: maintenanceValueSchema,
+    make: z.string().optional(),
+    type: z.string().optional(),
+  }),
+  brakeFluid: z.object({
+    values: maintenanceValueSchema,
+    make: z.string().optional(),
+    type: z.string().optional(),
+  }),
 })
 
 const fluidsSchema = z.object({
-  CLUTCH_FLUID: maintenanceValueSchema,
-  RADIATOR_COOLANT: maintenanceValueSchema,
-  INVERTER_COOLANT: maintenanceValueSchema,
-  BATTERY_WATER: maintenanceValueSchema,
-  WINDSCREEN_CLEANER: maintenanceValueSchema,
+  clutchFluid: maintenanceValueSchema,
+  radiatorCoolant: maintenanceValueSchema,
+  inverterCoolant: maintenanceValueSchema,
+  batteryWater: maintenanceValueSchema,
+  windscreenCleaner: maintenanceValueSchema,
 })
 
 const filtersSchema = z.object({
-  OIL_FILTER: maintenanceValueSchema,
-  FUEL_FILTER: maintenanceValueSchema,
-  AIR_FILTER: maintenanceValueSchema,
-  LINE_FILTER: maintenanceValueSchema,
-  CABIN_FILTER: maintenanceValueSchema,
+  oilFilter: maintenanceValueSchema,
+  fuelFilter: maintenanceValueSchema,
+  airFilter: maintenanceValueSchema,
+  lineFilter: maintenanceValueSchema,
+  cabinFilter: maintenanceValueSchema,
 })
-
 export const serviceFormSchema = z.object({
   serviceCode: z.string().nullable().optional(),
   customerID: z.string({
@@ -38,9 +57,6 @@ export const serviceFormSchema = z.object({
   }),
   vehicleID: z.string({
     required_error: "Please select a vehicle",
-  }),
-  jobID: z.string({
-    required_error: "Please select a job",
   }),
   mechanicID: z
     .string({
@@ -52,12 +68,71 @@ export const serviceFormSchema = z.object({
       invalid_type_error: "Please enter a valid number",
     })
     .nonnegative("Mileage cannot be negative"),
+  serviceDate: z.coerce
+    .date({
+      required_error: "Please select a service date",
+      invalid_type_error: "Please select a valid date",
+    }),
   maintenance: z.object({
-    LUBRICANTS: lubricantsSchema,
-    FLUIDS: fluidsSchema,
-    FILTERS: filtersSchema,
+    lubricants: lubricantsSchema,
+    fluids: fluidsSchema,
+    filters: filtersSchema,
   }),
+  status: z.enum(["ACT", "INA"]).optional(),
 })
+
+export const defaultFormValues = {
+      serviceCode: "",
+      customerID: undefined,
+      vehicleID: undefined,
+      mechanicID: "",
+      currentMileage: undefined,
+      serviceDate: new Date(),
+      maintenance: {
+        lubricants: {
+          engineOil: {
+            values: [],
+            oil: "",
+          },
+          transmissionOilAutoMan: {
+            values: [],
+            autoMan: undefined,
+            make: "",
+            type: "",
+          },
+          differentialOilFrontRear: {
+            values: [],
+            make: "",
+            type: "",
+          },
+          powerSteeringOil: {
+            values: [],
+            make: "",
+            type: "",
+          },
+          brakeFluid: {
+            values: [],
+            make: "",
+            type: "",
+          },
+        },
+        fluids: {
+          clutchFluid: [],
+          radiatorCoolant: [],
+          inverterCoolant: [],
+          batteryWater: [],
+          windscreenCleaner: [],
+        },
+        filters: {
+          oilFilter: [],
+          fuelFilter: [],
+          airFilter: [],
+          lineFilter: [],
+          cabinFilter: [],
+        },
+      },
+      status: "ACT" as "ACT" | "INA",
+    };
 
 export const saveService = async (data: FormData) => {
   const response = await apiService.post(

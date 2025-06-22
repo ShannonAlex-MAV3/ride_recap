@@ -24,15 +24,26 @@ export const repairFormSchema = z.object({
         })
         .nonnegative("Mileage cannot be negative"),
     total: z.coerce
-    .number({
-        required_error: "Please enter the total amount",
-        invalid_type_error: "Total must be a valid number",
-    })
-    .nonnegative("Total cannot be negative"), 
+        .number({
+            required_error: "Please enter the total amount",
+            invalid_type_error: "Total must be a valid number",
+        })
+        .nonnegative("Total cannot be negative"),
     status: z.enum(["ACT", "INA"], {
         required_error: "Please select a status",
     }).default("ACT"),
 })
+
+export const defaultFormValues = {
+    repairCode: "",
+    customerId: undefined,
+    vehicleId: undefined,
+    jobId: undefined,
+    mechanicId: undefined,
+    currentMileage: undefined,
+    total: undefined,
+    status: "ACT" as "ACT" | "INA",
+}
 
 export const fetchRepairs = async (): Promise<Repair[]> => {
     const response = await apiService.get(
@@ -87,11 +98,14 @@ export const AddRepair = async (data: Repair) => {
     return response;
 };
 
-export const updateRepair = async (data: Repair) => {
+export const updateRepair = async (repairID: number, data: Repair) => {
     const response = await apiService.put(
-        API_URLS.updateRepair,
+        API_URLS.updateRepair(repairID),
         data,
         {
+            headers: {
+                'Content-Type': 'application/json',
+            },
             toast: {
                 enabled: true,
                 loading: {
@@ -109,6 +123,9 @@ export const fetchRepairById = async (repairID: number): Promise<Repair> => {
     const response = await apiService.get(
         API_URLS.getRepairById(repairID),
         {
+            headers: {
+                'Content-Type': 'application/json',
+            },
             toast: {
                 enabled: true,
                 loading: {

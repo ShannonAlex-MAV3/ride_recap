@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Repair" ADD COLUMN     "total" INTEGER NOT NULL DEFAULT 0;

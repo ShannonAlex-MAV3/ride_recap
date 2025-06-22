@@ -7,6 +7,7 @@ import { useParams } from "react-router-dom";
 import { z } from "zod";
 import {
   AddRepair,
+  defaultFormValues,
   fetchRepairById,
   repairFormSchema,
   updateRepair,
@@ -48,20 +49,14 @@ const AddEditRepair = () => {
     fetchJobs,
     mechanics,
     fetchMechanics,
+    isLoadingCustomers,
+    isLoadingJobs,
+    isLoadingMechanics,
   } = useMasterStore();
 
   const repairForm = useForm<FormValues>({
     resolver: zodResolver(repairFormSchema),
-    defaultValues: {
-      repairCode: "",
-      customerId: undefined,
-      vehicleId: undefined,
-      jobId: undefined,
-      mechanicId: undefined,
-      currentMileage: undefined,
-      total: undefined,
-      status: `ACT`,
-    },
+    defaultValues: defaultFormValues,
     mode: "onChange",
   });
 
@@ -88,8 +83,7 @@ const AddEditRepair = () => {
 
   // Separate effect to handle repair loading when ID changes
   useEffect(() => {
-
-    if(customers.length == 0 || jobs.length == 0 || mechanics.length == 0) return;
+    /* if(customers.length == 0 || jobs.length == 0 || mechanics.length == 0) return;*/
 
     if (!repairID) return;
 
@@ -97,99 +91,74 @@ const AddEditRepair = () => {
       setIsLoading(true);
 
       try {
-        console.log("customer :",customers);
         const response = await fetchRepairById(parseInt(repairID));
+        setRepair(response);
 
         if (response) {
-          console.log("Repair fetched successfully:", response);
-          setRepair(response);
-
-          // Set other form values
-          repairForm.setValue("repairCode", response.repairCode, {
-            shouldValidate: true,
-            shouldDirty: false,
+          repairForm.reset({
+            repairCode: response.repairCode,
+            customerId: String(response.customerID),
+            vehicleId: String(response.vehicleID),
+            jobId: String(response.jobID),
+            mechanicId: String(response.mechanicID),
+            currentMileage: response.currentMileage,
+            total: response.total,
+            status: (response.status as "ACT" | "INA") || "ACT",
           });
-          console.log(customers)
-          repairForm.setValue("customerId", String(response.customerID), {
-            shouldValidate: true,
-            shouldDirty: false,
-          });
-          repairForm.setValue("vehicleId", String(response.vehicleID), {
-            shouldValidate: true,
-            shouldDirty: false,
-          });
-          repairForm.setValue("jobId", String(response.jobID), {
-            shouldValidate: true,
-            shouldDirty: false,
-          });
-          repairForm.setValue("mechanicId", String(response.mechanicID), {
-            shouldValidate: true,
-            shouldDirty: false,
-          });
-          repairForm.setValue("currentMileage", response.currentMileage, {
-            shouldValidate: true,
-            shouldDirty: false,
-          });
-          repairForm.setValue("total", response.total ?? 0, {
-            shouldValidate: true,
-            shouldDirty: false,
-          });
-          // repairForm.setValue("status", response.status, {
-          //   shouldValidate: true,
-          //   shouldDirty: false,
-          // });
-
-          // Fetch vehicles in the same effect
-          const vehicleData = await getVehiclesByCustomerId(
-            response.customerID
-          );
-          if (vehicleData && vehicleData.length > 0) {
-            setVehicles(vehicleData);
-            repairForm.setValue("vehicleId", String(response.vehicleID), {
-              shouldValidate: true,
-              shouldDirty: false,
-            });
-          }
         }
       } catch (error) {
-        console.error("Error loading auto care:", error);
+        console.error("Error loading repair:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
     loadRepair();
-  }, [repairID,customers, mechanics, jobs]);
+  }, [repairID, repairForm]);
 
-  const { isSubmitting, isSubmitted: isSuccess } = repairForm.formState;
+  // Fetch vehicles when customer changes
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      const customerID = repairForm.getValues("customerId");
+      if (customerID) {
+        const vehicleData = await getVehiclesByCustomerId(parseInt(customerID));
+        setVehicles(vehicleData);
+      } else {
+        setVehicles([]);
+      }
+    };
+    fetchVehicles();
+  }, [repairForm.getValues("customerId")]);
+
+  const { isSubmitting  } = repairForm.formState;
   const isNew = !repair;
 
-  const onSubmit = async (data: FormValues) => {
-    const rq: Repair = {
-      customerID: parseInt(data.customerId, 10),
-      vehicleID: parseInt(data.vehicleId, 10),
-      jobID: parseInt(data.jobId, 10),
-      mechanicID: parseInt(data.mechanicId, 10),
-      currentMileage: data.currentMileage ?? 0,
-      status: data.status,
+  const onSubmit = async (_d: FormValues) => {
+    const values = repairForm.getValues();
+
+    // Build a plain object with the fields
+    const payload: Repair = {
+      customerID: Number(values.customerId),
+      vehicleID: Number(values.vehicleId),
+      jobID: Number(values.jobId),
+      mechanicID: Number(values.mechanicId),
+      currentMileage: Number(values.currentMileage ?? 0),
+      total: values.total !== undefined ? Number(values.total) : undefined,
+      status: values.status || "ACT",
     };
 
-    // If we're editing an existing record
     if (!isNew && repair?.repairID) {
-      rq.repairID = repair.repairID;
-      rq.repairCode = repair.repairCode;
+      // Add repairID and repairCode when editing
+      payload.repairID = repair.repairID;
+      payload.repairCode = repair.repairCode ?? "";
 
-      const response = await updateRepair(rq);
+      const response = await updateRepair(repair.repairID, payload);
       if (response) {
-        console.log("Repair updated successfully:", response);
         setRepair(response);
       }
     } else {
-      // Create new Repair
-      const response = await AddRepair(rq);
+      const response = await AddRepair(payload);
       if (response) {
-        console.log("Repair added successfully:", response);
-
         // Reset the form with the new repairCode
         repairForm.setValue("repairCode", response.repairCode, {
           shouldValidate: true,
@@ -429,8 +398,7 @@ const AddEditRepair = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
-                          Total{" "}
-                          <span className="text-red-500">*</span>
+                          Total <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -481,7 +449,7 @@ const AddEditRepair = () => {
                     onClick={() => {
                       if (!isNew && repair) {
                         // In edit mode, preserve the ID and code
-                       //@ts-expect-error error
+                        //@ts-expect-error error
                         repairForm.reset({
                           repairCode: repair.repairCode,
                           customerId: repair.customerID.toString(),
@@ -489,19 +457,12 @@ const AddEditRepair = () => {
                           jobId: repair.jobID.toString(),
                           mechanicId: repair.mechanicID.toString(),
                           currentMileage: repair.currentMileage,
+                          total: repair.total,
                           status: repair.status ?? `ACT`,
-                        }); 
+                        });
                       } else {
                         // In add mode, completely reset
-                        repairForm.reset({
-                          repairCode: "",
-                          customerId: "",
-                          vehicleId: "",
-                          jobId: "",
-                          mechanicId: "",
-                          currentMileage: undefined,
-                          status: `ACT`,
-                        });
+                        repairForm.reset(defaultFormValues);
                       }
                     }}
                     disabled={isSubmitting}
@@ -515,13 +476,9 @@ const AddEditRepair = () => {
                   >
                     {isSubmitting ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : isSuccess ? (
-                      <CheckCircle2 className="mr-2 h-4 w-4" />
                     ) : null}
                     {isSubmitting
                       ? "Submitting..."
-                      : isSuccess
-                      ? "Success!"
                       : isNew
                       ? "Add Repair"
                       : "Update Repair"}
@@ -530,12 +487,15 @@ const AddEditRepair = () => {
               </form>
             </Form>
           )}
-          {isLoading && (
-            <div className="flex items-center justify-center h-full">
-              <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-              Loading...
-            </div>
-          )}
+          {isLoading ||
+            isLoadingCustomers ||
+            isLoadingJobs ||
+            (isLoadingMechanics && (
+              <div className="flex items-center justify-center h-full">
+                <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                Loading...
+              </div>
+            ))}
         </div>
       </div>
     </>

@@ -5,7 +5,8 @@ model Repair {
     vehicleID      Int
     jobID          Int
     currentMileage Int
-    mechanicID       Int
+    mechanicID     Int
+    total          Int       @default(0)
     status         StatusP   @default(ACT)
     createdAt      DateTime  @default(now())
     updatedAt      DateTime?

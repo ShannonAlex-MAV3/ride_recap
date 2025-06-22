@@ -133,6 +133,7 @@ export type Service = {
   vehicleID: number;
   jobID: number;
   currentMileage: number;
+  serviceDate: Date;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   maintenance: any;
   mechanicID?: number;
@@ -153,9 +154,9 @@ export type ServiceWithDetails = {
   licensePlate: string;
   make: string;
   model: string;
-  jobID: number;
   jobName?: string;
   currentMileage: number;
+  serviceDate: string;
   mechanicID?: number;
   status?: string;
   createdAt?: string;

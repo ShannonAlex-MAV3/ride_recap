@@ -3,8 +3,8 @@ model Service {
     serviceCode   String    @unique
     customerID     Int
     vehicleID      Int
-    jobID          Int
     currentMileage Int
+    serviceDate   DateTime @default(now())
     mechanicID     Int
     maintenance    Json
     status         StatusP   @default(ACT)

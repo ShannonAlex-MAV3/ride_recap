@@ -1,23 +1,28 @@
 import { Service, Vehicle } from "@/@types";
 import FileUpload from "@/components/file-upload/FileUpload";
+import FormCheckbox from "@/components/form-components/FormCheckbox";
+import FormInput from "@/components/form-components/FormInput";
+import FormRadio from "@/components/form-components/FormRadio";
+import FormSelect from "@/components/form-components/FormSelect";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { CardContent, CardFooter } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { useMasterStore } from "@/hooks/use-master-store";
+import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { format } from "date-fns";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Path, useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { z } from "zod";
-import { constants } from "../../constants";
+import { constants, formFieldConstants } from "../../constants";
 import { getVehiclesByCustomerId } from "../customer/Util";
-import { fetchServiceById, saveService, serviceFormSchema, updateService } from "./util";
+import { defaultFormValues, fetchServiceById, saveService, serviceFormSchema, updateService } from "./util";
 
 type FormValues = z.infer<typeof serviceFormSchema>;
 
@@ -25,67 +30,32 @@ const AddEditService = () => {
   const { serviceID } = useParams<{ serviceID: string }>();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [service, setService] = useState<Service | null>(null);
-  const { customers, jobs, fetchCustomers, fetchJobs, mechanics, fetchMechanics } = useMasterStore();
+  const { customers, fetchCustomers, mechanics, fetchMechanics, isLoadingCustomers, isLoadingMechanics } =
+    useMasterStore();
   const [isLoading, setIsLoading] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
 
   const serviceForm = useForm<FormValues>({
     resolver: zodResolver(serviceFormSchema),
-    defaultValues: {
-      serviceCode: "",
-      customerID: undefined,
-      vehicleID: undefined,
-      jobID: undefined,
-      mechanicID: "",
-      currentMileage: undefined,
-      maintenance: {
-        LUBRICANTS: {
-          ENGINE_OIL: [],
-          TRANSMISSION_OIL_AUTO_MA: [],
-          DIFFERENTIAL_OIL_FRONT_REAR: [],
-          POWER_STEERING_OIL: [],
-          BRAKE_FLUID: [],
-        },
-        FLUIDS: {
-          CLUTCH_FLUID: [],
-          RADIATOR_COOLANT: [],
-          INVERTER_COOLANT: [],
-          BATTERY_WATER: [],
-          WINDSCREEN_CLEANER: [],
-        },
-        FILTERS: {
-          OIL_FILTER: [],
-          FUEL_FILTER: [],
-          AIR_FILTER: [],
-          LINE_FILTER: [],
-          CABIN_FILTER: [],
-        },
-      },
-    },
+    defaultValues: defaultFormValues,
     mode: "onChange",
+    disabled: serviceID ? true : false,
   });
 
   // Effect to fetch initial data
   useEffect(() => {
     const loadInitialData = async () => {
-      setIsLoading(true);
       if (customers.length === 0) {
         await fetchCustomers();
       }
-      if (jobs.length === 0) {
-        await fetchJobs();
-      }
-
       if (mechanics.length === 0) {
         await fetchMechanics();
       }
-      setIsLoading(false);
     };
-
     loadInitialData();
-  }, [customers.length, jobs.length, fetchCustomers, fetchJobs]);
+  }, []);
 
-  // Separate effect to handle auto care loading when ID changes
+  // Load service data when editing and viewing
   useEffect(() => {
     if (!serviceID) return;
 
@@ -97,52 +67,21 @@ const AddEditService = () => {
           setService(response);
 
           // Set form values from response
-          serviceForm.setValue("customerID", String(response.customerID), {
-            shouldValidate: true,
-            shouldDirty: false,
+          serviceForm.reset({
+            serviceCode: response.serviceCode,
+            customerID: String(response.customerID),
+            vehicleID: String(response.vehicleID),
+            mechanicID: String(response.mechanicID),
+            currentMileage: response.currentMileage,
+            serviceDate: new Date(response.serviceDate),
+            maintenance: response.maintenance || defaultFormValues.maintenance,
+            status: (response.status as "ACT" | "INA") || "ACT",
           });
-
-          serviceForm.setValue("serviceCode", response.serviceCode, {
-            shouldValidate: true,
-            shouldDirty: false,
-            shouldTouch: false,
-          });
-          serviceForm.setValue("vehicleID", String(response.vehicleID), {
-            shouldValidate: true,
-            shouldDirty: false,
-          });
-          serviceForm.setValue("jobID", String(response.jobID), {
-            shouldValidate: true,
-            shouldDirty: false,
-          });
-          serviceForm.setValue("mechanicID", String(response.mechanicID), {
-            shouldValidate: true,
-            shouldDirty: false,
-          });
-          serviceForm.setValue("currentMileage", response.currentMileage, {
-            shouldValidate: true,
-            shouldDirty: false,
-          });
-
-          serviceForm.setValue("maintenance", response.maintenance, {
-            shouldValidate: true,
-            shouldDirty: false,
-          });
-
-          // Fetch vehicles in the same effect
-          const vehicleData = await getVehiclesByCustomerId(response.customerID);
-          if (vehicleData && vehicleData.length > 0) {
-            setVehicles(vehicleData);
-            serviceForm.setValue("vehicleID", String(response.vehicleID), {
-              shouldValidate: true,
-              shouldDirty: false,
-            });
-          }
         }
       } catch (error) {
-        console.error("Error loading auto care:", error);
+        console.error("Error loading service:", error);
       } finally {
-        setFiles([])
+        setFiles([]);
         setIsLoading(false);
       }
     };
@@ -150,6 +89,7 @@ const AddEditService = () => {
     loadService();
   }, [serviceID, serviceForm]);
 
+  // Fetch vehicles when customer changes
   useEffect(() => {
     const fetchVehicles = async () => {
       const customerID = serviceForm.getValues("customerID");
@@ -160,49 +100,49 @@ const AddEditService = () => {
         setVehicles([]);
       }
     };
-
     fetchVehicles();
   }, [serviceForm.getValues("customerID")]);
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (_d: FormValues) => {
+    const data = serviceForm.getValues();
     console.log("Form submitted with data:", data);
     const formData = new FormData();
-    formData.append("customerID", (isNew ? data.customerID : service.customerID.toString()) || "");
-    formData.append("vehicleID", (isNew ? data.vehicleID : service.vehicleID.toString()) || "");
-    formData.append("jobID", (isNew ? data.jobID : service.jobID.toString()) || "");
-    formData.append("mechanicID", (isNew ? data.mechanicID : service.mechanicID?.toString()) || "");
+
+    // Add basic fields
+    formData.append("customerID", data.customerID);
+    formData.append("vehicleID", data.vehicleID);
+    formData.append("mechanicID", data.mechanicID);
     formData.append("currentMileage", data.currentMileage?.toString() ?? "0");
-    formData.append("status", "ACT");
+    formData.append("serviceDate", data.serviceDate.toISOString());
+    formData.append("status", data.status || "ACT");
+    formData.append("maintenance", JSON.stringify(data.maintenance));
 
-    formData.append(
-      "maintenance",
-      JSON.stringify({
-        LUBRICANTS: data.maintenance.LUBRICANTS,
-        FLUIDS: data.maintenance.FLUIDS,
-        FILTERS: data.maintenance.FILTERS,
-      })
-    );
-
-    // Append each file individually with the same field name
+    // Append files
     files.forEach((file) => {
       formData.append("attachments", file);
     });
 
     formData.append("attachmentsRefs", JSON.stringify(service?.attachmentRefs || []));
 
-    if (isNew) addService(formData);
-    else updateServiceData(formData);
+    if (isNew) {
+      await addService(formData);
+    } else {
+      await updateServiceData(formData);
+    }
   };
 
   const addService = async (formData: FormData) => {
     const response = await saveService(formData);
     if (!response) return;
+
     serviceForm.setValue("serviceCode", response.serviceCode, {
       shouldValidate: true,
       shouldDirty: false,
       shouldTouch: false,
     });
     setService(response);
+
+    
   };
 
   const updateServiceData = async (formData: FormData) => {
@@ -213,69 +153,49 @@ const AddEditService = () => {
     setService(response);
   };
 
-  const handleClearSection = (sectionKey: keyof FormValues["maintenance"]) => {
-    const emptySection =
-      sectionKey === "LUBRICANTS"
-        ? {
-            ENGINE_OIL: [],
-            TRANSMISSION_OIL_AUTO_MA: [],
-            DIFFERENTIAL_OIL_FRONT_REAR: [],
-            POWER_STEERING_OIL: [],
-            BRAKE_FLUID: [],
-          }
-        : sectionKey === "FLUIDS"
-        ? {
-            CLUTCH_FLUID: [],
-            RADIATOR_COOLANT: [],
-            INVERTER_COOLANT: [],
-            BATTERY_WATER: [],
-            WINDSCREEN_CLEANER: [],
-          }
-        : {
-            OIL_FILTER: [],
-            FUEL_FILTER: [],
-            AIR_FILTER: [],
-            LINE_FILTER: [],
-            CABIN_FILTER: [],
-          };
-
-    serviceForm.setValue(`maintenance.${sectionKey}`, emptySection, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-  };
-
-  const handleCheckboxChange = (
-    sectionKey: keyof FormValues["maintenance"],
-    subSectionKey: string,
-    value: string,
-    checked: boolean
+  // Helper function to render maintenance fields
+  const renderMaintenanceFields = (
+    sectionKey: string,
+    subsectionKey: string,
+    fields: { label: string; value: string; type: string; radioValues?: { label: string; value: string }[] }[]
   ) => {
-    const currentMaintenance = serviceForm.getValues("maintenance");
-    const currentSection = currentMaintenance[sectionKey] as Record<string, string[]>;
-    const currentValues = currentSection[subSectionKey] || [];
+    if (!fields || fields.length === 0) return null;
 
-    const newValues = checked ? [...currentValues, value] : currentValues.filter((v) => v !== value);
+    return (
+      <div className="space-y-2">
+        {fields.map((field) => {
+          const fieldPath = `maintenance.${sectionKey}.${subsectionKey}.${field.value}` as Path<FormValues>;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    serviceForm.setValue(`maintenance.${sectionKey}.${subSectionKey}` as any, newValues, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-  };
-
-  const isCheckboxChecked = (
-    sectionKey: keyof FormValues["maintenance"],
-    subSectionKey: string,
-    value: string
-  ): boolean => {
-    const currentMaintenance = serviceForm.getValues("maintenance");
-    if (!currentMaintenance || !currentMaintenance[sectionKey]) return false;
-
-    const currentSection = currentMaintenance[sectionKey] as Record<string, string[]>;
-    const currentValues = currentSection[subSectionKey] || [];
-
-    return currentValues.includes(value);
+          switch (field.type) {
+            case formFieldConstants.TEXT:
+              return (
+                <FormInput
+                  key={field.value}
+                  form={serviceForm}
+                  name={fieldPath}
+                  label={field.label}
+                  type="text"
+                  placeholder={'Type here...'}
+                  disabled={serviceForm.formState.disabled}
+                />
+              );
+            case formFieldConstants.RADIO_GROUP:
+              return (
+                <FormRadio
+                  key={field.value}
+                  form={serviceForm}
+                  name={fieldPath}
+                  label={field.label}
+                  radioValues={field.radioValues!}
+                  disabled={serviceForm.formState.disabled}
+                />
+              );
+            default:
+              return null;
+          }
+        })}
+      </div>
+    );
   };
 
   const maintenceTypes = Object.entries(constants.SERVICE_MAINTENANCE_TYPES);
@@ -284,187 +204,121 @@ const AddEditService = () => {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">{isNew ? "Add Auto Care" : "Edit Auto care"}</h1>
+      <h1 className="text-2xl font-bold mb-4">{isNew ? "Add Service" : "View Service"}</h1>
       <div className="flex-grow p-4 items-center justify-center rounded-lg border border-dashed shadow-sm">
-        {!isLoading && (
+        {!isLoading && !isLoadingCustomers && !isLoadingMechanics && (
           <Form {...serviceForm}>
             <form onSubmit={serviceForm.handleSubmit(onSubmit)}>
               <CardContent className="space-y-6 pt-6">
                 {/* Auto Care Code */}
-                <FormField
-                  control={serviceForm.control}
-                  disabled={true}
-                  name="serviceCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Auto Care Code <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input placeholder="This is generated automatically" {...field} value={field.value ?? ""} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {service?.serviceID && (
+                  <FormInput
+                    form={serviceForm}
+                    name="serviceCode"
+                    label="Auto Care Code"
+                    type="text"
+                    required={true}
+                    placeholder="This is generated automatically"
+                    disabled={true}
+                  />
+                )}
+
                 {/* Customer Selection */}
-                <FormField
-                  control={serviceForm.control}
+                <FormSelect 
+                  form={serviceForm}
                   name="customerID"
-                  disabled={!isNew}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Customer <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Select
-                          disabled={isSubmitting || !isNew}
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            // Reset vehicle when customer changes
-                            if (isNew) {
-                              serviceForm.setValue("vehicleID", "");
-                            }
-                          }}
-                          value={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a customer" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {customers?.map((customer) => (
-                              <SelectItem key={customer.customerID} value={customer.customerID.toString()}>
-                                {customer.firstName} {customer.lastName} ({customer.customerCode})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="Customer"
+                  required={true}
+                  placeholder="Select a customer"
+                  options={customers.map((customer) => ({
+                    value: customer.customerID.toString(),
+                    label: `${customer.firstName} ${customer.lastName} (${customer.customerCode})`,
+                  }))}
+                  disabled={isSubmitting || !isNew}
                 />
+
                 {/* Vehicle Selection */}
-                <FormField
-                  control={serviceForm.control}
-                  disabled={!isNew}
+                <FormSelect
+                  form={serviceForm}
                   name="vehicleID"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Vehicle <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Select
-                          disabled={!serviceForm.watch("customerID") || isSubmitting || !isNew}
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue
-                              placeholder={
-                                serviceForm.watch("customerID") ? "Select a vehicle" : "Select a customer first"
-                              }
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {vehicles.length > 0 ? (
-                              vehicles.map((vehicle) => (
-                                <SelectItem key={vehicle.vehicleID} value={vehicle.vehicleID.toString()}>
-                                  {vehicle.licensePlate} - {vehicle.make} {vehicle.model} ({vehicle.color})
-                                </SelectItem>
-                              ))
-                            ) : (
-                              <SelectItem value="no-vehicles" disabled>
-                                No vehicles available
-                              </SelectItem>
-                            )}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="Vehicle"
+                  required={true}
+                  placeholder={
+                    serviceForm.watch("customerID") ? "Select a vehicle" : "Select a customer first"
+                  }
+                  options={vehicles.map((vehicle) => ({
+                    value: vehicle.vehicleID.toString(),
+                    label: `${vehicle.licensePlate} - ${vehicle.make} ${vehicle.model} (${vehicle.color})`,
+                  }))}
+                  disabled={!serviceForm.watch("customerID") || isSubmitting || !isNew}
                 />
-                {/* Job Selection */}
-                <FormField
-                  control={serviceForm.control}
-                  name="jobID"
-                  disabled={!isNew}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Job <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Select disabled={isSubmitting || !isNew} onValueChange={field.onChange} value={field.value}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a job" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {jobs?.map((job) => (
-                              <SelectItem key={job.jobID} value={job.jobID.toString()}>
-                                {job.jobName} ({job.jobCode})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {/* Mechanic Selection */}{" "}
-                <FormField
-                  control={serviceForm.control}
+
+                {/* Mechanic Selection */}
+                <FormSelect
+                  form={serviceForm}
                   name="mechanicID"
-                  disabled={!isNew}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Mechanic <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Select disabled={isSubmitting || !isNew} onValueChange={field.onChange} value={field.value}>
-                          <SelectTrigger className="w-4/5">
-                            <SelectValue placeholder="Select a mechanic" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {mechanics?.map((mechanic) => (
-                              <SelectItem key={mechanic.mechanicID} value={mechanic.mechanicID.toString()}>
-                                {mechanic.firstName} ({mechanic.nic})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="Mechanic"
+                  required={true}
+                  placeholder="Select a mechanic"
+                  options={mechanics.map((mechanic) => ({
+                    value: mechanic.mechanicID.toString(),
+                    label: `${mechanic.firstName} ${mechanic.lastName} (${mechanic.nic})`,
+                  }))}
+                  disabled={isSubmitting || !isNew}
                 />
+
                 {/* Current Mileage */}
+                <FormInput
+                  form={serviceForm}
+                  name="currentMileage"
+                  label="Current Mileage (km)"
+                  type="number"
+                  placeholder="Enter current mileage"
+                  disabled={serviceForm.formState.disabled || isSubmitting}
+                  inputProps={{
+                    min: 0,
+                  }}
+                />
+
+                {/* Service Date */}
                 <FormField
                   control={serviceForm.control}
-                  name="currentMileage"
+                  name="serviceDate"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="flex flex-col w-full">
                       <FormLabel>
-                        Current Mileage (km) <span className="text-red-500">*</span>
+                        Service Date <span className="text-red-500">*</span>
                       </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="Enter current mileage"
-                          {...field}
-                          disabled={isSubmitting}
-                          min="0"
-                        />
-                      </FormControl>
+                      <Popover>
+                        <PopoverTrigger disabled={serviceForm.formState.disabled} asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                            captionLayout="dropdown"
+                          />
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 {/* Maintenance Sections */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -477,132 +331,74 @@ const AddEditService = () => {
                     <div key={sectionKey} className="space-y-4">
                       <div className="flex items-center justify-between">
                         <h3 className="text-lg font-semibold text-foreground">{section.label}</h3>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleClearSection(sectionKey as keyof FormValues["maintenance"])}
-                        >
-                          Clear Section
-                        </Button>
                       </div>
+
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                         {section.subSections.map((subSection) => (
                           <div key={subSection.value} className="space-y-3">
-                            <Label className="text-sm font-medium text-muted-foreground block">
+                            <Label className="text-xs font-medium text-muted-foreground block">
                               {subSection.label}
                             </Label>
-                            <div className="space-y-2">
-                              {Object.entries(constants.SERVICE_MAINTENANCE_VALUES).map(([key, value]) => (
-                                <div key={key} className="flex flex-row items-center space-x-2 space-y-0">
-                                  <Checkbox
-                                    checked={isCheckboxChecked(
-                                      sectionKey as keyof FormValues["maintenance"],
-                                      subSection.value,
-                                      key
-                                    )}
-                                    onCheckedChange={(checked) =>
-                                      handleCheckboxChange(
-                                        sectionKey as keyof FormValues["maintenance"],
-                                        subSection.value,
-                                        key,
-                                        !!checked
-                                      )
-                                    }
-                                  />
-                                  <Label className="text-sm font-normal cursor-pointer flex items-center gap-1">
-                                    <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">{value}</span>
-                                  </Label>
-                                </div>
-                              ))}
+
+                            <div className="grid grid-rows-[auto_1fr] gap-4">
+                              {/* Maintenance Value Checkboxes */}
+                              <FormCheckbox
+                                form={serviceForm}
+                                name={
+                                  (sectionKey == "lubricants"
+                                    ? `maintenance.${sectionKey}.${subSection.value}.values`
+                                    : `maintenance.${sectionKey}.${subSection.value}`) as Path<FormValues>
+                                }
+                                options={Object.entries(constants.SERVICE_MAINTENANCE_VALUES).map(([key, value]) => ({
+                                  id: key,
+                                  label: value,
+                                }))}
+                                disabled={serviceForm.formState.disabled || isSubmitting}
+                              />
+                              {/* Additional maintenance fields Fields */}
+                              {/* @ts-expect-error some sections may not have fields */}
+                              {subSection.fields && renderMaintenanceFields(sectionKey, subSection.value, subSection.fields)}
                             </div>
                           </div>
                         ))}
                       </div>
-                      {sectionKey !== "FILTERS" && <Separator />}
+
+                      {sectionKey !== "filters" && <Separator />}
                     </div>
                   ))}
                 </div>
+
                 {/* File Upload */}
                 <FileUpload
                   label="Upload Receipts & Attachments"
                   files={files}
                   onUploadFile={(files: File[]) => setFiles((prev) => [...prev, ...files])}
                   fileRefs={service?.attachmentRefs || []}
+                  disabled={serviceForm.formState.disabled || isSubmitting}
+                />
+
+                {/* Status */}
+                <FormSelect
+                  form={serviceForm}
+                  name="status"
+                  label="Status"
+                  required={true}
+                  placeholder="Select status"
+                  options={[
+                    { value: "ACT", label: "Active" },
+                    { value: "INA", label: "Inactive" },
+                  ]}
+                  disabled={isSubmitting}
                 />
               </CardContent>
+
               <CardFooter className="flex justify-end space-x-2 border-t pt-6">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => {
-                    if (!isNew && service) {
-                      // In edit mode, preserve the ID and code
-                      serviceForm.reset({
-                        serviceCode: service.serviceCode,
-                        customerID: service.customerID.toString(),
-                        vehicleID: service.vehicleID.toString(),
-                        jobID: service.jobID.toString(),
-                        mechanicID: service.mechanicID?.toString(),
-                        currentMileage: service.currentMileage,
-                        maintenance: {
-                          LUBRICANTS: {
-                            ENGINE_OIL: [],
-                            TRANSMISSION_OIL_AUTO_MA: [],
-                            DIFFERENTIAL_OIL_FRONT_REAR: [],
-                            POWER_STEERING_OIL: [],
-                            BRAKE_FLUID: [],
-                          },
-                          FLUIDS: {
-                            CLUTCH_FLUID: [],
-                            RADIATOR_COOLANT: [],
-                            INVERTER_COOLANT: [],
-                            BATTERY_WATER: [],
-                            WINDSCREEN_CLEANER: [],
-                          },
-                          FILTERS: {
-                            OIL_FILTER: [],
-                            FUEL_FILTER: [],
-                            AIR_FILTER: [],
-                            LINE_FILTER: [],
-                            CABIN_FILTER: [],
-                          },
-                        },
-                      });
-                    } else {
-                      // In add mode, completely reset
-                      serviceForm.reset({
-                        serviceCode: "",
-                        customerID: "",
-                        vehicleID: "",
-                        jobID: "",
-                        mechanicID: "",
-                        currentMileage: undefined,
-                        maintenance: {
-                          LUBRICANTS: {
-                            ENGINE_OIL: [],
-                            TRANSMISSION_OIL_AUTO_MA: [],
-                            DIFFERENTIAL_OIL_FRONT_REAR: [],
-                            POWER_STEERING_OIL: [],
-                            BRAKE_FLUID: [],
-                          },
-                          FLUIDS: {
-                            CLUTCH_FLUID: [],
-                            RADIATOR_COOLANT: [],
-                            INVERTER_COOLANT: [],
-                            BATTERY_WATER: [],
-                            WINDSCREEN_CLEANER: [],
-                          },
-                          FILTERS: {
-                            OIL_FILTER: [],
-                            FUEL_FILTER: [],
-                            AIR_FILTER: [],
-                            LINE_FILTER: [],
-                            CABIN_FILTER: [],
-                          },
-                        },
-                      });
-                    }
+                    serviceForm.reset(defaultFormValues);
+                    setFiles([]);
                   }}
                   disabled={isSubmitting}
                 >
@@ -620,12 +416,15 @@ const AddEditService = () => {
             </form>
           </Form>
         )}
-        {isLoading && (
-          <div className="flex items-center justify-center h-full">
-            <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-            Loading...
-          </div>
-        )}
+
+        {isLoading ||
+          isLoadingCustomers ||
+          (isLoadingMechanics && (
+            <div className="flex items-center justify-center h-full">
+              <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+              Loading...
+            </div>
+          ))}
       </div>
     </div>
   );

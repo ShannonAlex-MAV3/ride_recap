@@ -29,8 +29,8 @@ export const addService = async (serviceData: any) => {
             serviceCode,
             customerID: parseInt(serviceData.customerID),
             vehicleID: parseInt(serviceData.vehicleID),
-            jobID: parseInt(serviceData.jobID),
             currentMileage: parseInt(serviceData.currentMileage) || 0,
+            serviceDate: new Date(serviceData.serviceDate),
             maintenance: JSON.parse(serviceData.maintenance),
             mechanicID: parseInt(serviceData.mechanicID),
             status: serviceData.status,
@@ -148,6 +148,7 @@ export const updateService = async (serviceID: number, serviceData: any): Promis
             data: {
               currentMileage: parseInt(serviceData.currentMileage) || 0,
               maintenance: JSON.parse(serviceData.maintenance),
+              status: serviceData.status,
               updatedAt: new Date(),
             },
             include: {
@@ -217,11 +218,12 @@ export const getServiceById = async (serviceID: number): Promise<Service | null>
 
 
 
-export const getAllServices = async (): Promise<ServiceWithDetails[]> => {
+export const getAllServices = async (customerIds?: number[], vehicleLicensePlate?: string): Promise<ServiceWithDetails[]> => {
     logger.info("Start: Fetching all Service records with details.");
+    logger.info(`Filters - customerIds: ${customerIds}, vehicleLicensePlate: ${vehicleLicensePlate}`);
 
-    // Using raw SQL for optimized joins to get all necessary data in a single query
-    const services = await prisma.$queryRaw`
+    // Build the SQL query with potential filters
+    let sql = `
         SELECT 
             s.*, 
             c."firstName", 
@@ -229,20 +231,34 @@ export const getAllServices = async (): Promise<ServiceWithDetails[]> => {
             c."customerCode",
             v."licensePlate",
             v."make",
-            v."model",
-            j."jobCode",
-            j."jobName"
+            v."model"
         FROM 
             "Service" s
         INNER JOIN 
             "Customer" c ON s."customerID" = c."customerID"
         INNER JOIN 
             "Vehicle" v ON s."vehicleID" = v."vehicleID"
-        INNER JOIN 
-            "JobConfig" j ON s."jobID" = j."jobID"
-        ORDER BY 
-            s."serviceID" DESC
+        WHERE 1=1
     `;
+
+    const params: any[] = [];
+    
+    // Add customerIds filter if provided
+    if (customerIds && customerIds.length > 0) {
+        sql += ` AND s."customerID" IN (${customerIds.map((_, i) => `$${i + 1}`).join(',')})`;
+        params.push(...customerIds);
+    }
+    
+    // Add vehicle license plate filter if provided
+    if (vehicleLicensePlate) {
+        sql += ` AND v."licensePlate" ILIKE $${params.length + 1}`;
+        params.push(`%${vehicleLicensePlate}%`);
+    }
+    
+    sql += ` ORDER BY s."serviceID" DESC`;
+    
+    // Execute the query with parameters
+    const services = await prisma.$queryRawUnsafe(sql, ...params);
 
     // Group services and their attachments
     const serviceMap = new Map();

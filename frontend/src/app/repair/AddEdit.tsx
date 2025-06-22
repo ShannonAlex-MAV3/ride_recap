@@ -481,7 +481,7 @@ const AddEditRepair = () => {
                     onClick={() => {
                       if (!isNew && repair) {
                         // In edit mode, preserve the ID and code
-                        //@ts-expect-error error
+                       //@ts-expect-error error
                         repairForm.reset({
                           repairCode: repair.repairCode,
                           customerId: repair.customerID.toString(),
@@ -490,7 +490,7 @@ const AddEditRepair = () => {
                           mechanicId: repair.mechanicID.toString(),
                           currentMileage: repair.currentMileage,
                           status: repair.status ?? `ACT`,
-                        });
+                        }); 
                       } else {
                         // In add mode, completely reset
                         repairForm.reset({

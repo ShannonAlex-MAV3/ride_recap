@@ -1,3 +1,8 @@
+export const formFieldConstants = {
+    TEXT: "TEXT",
+    RADIO_GROUP: "RADIO_GROUP",
+}
+
 export const constants = {
     AUTOCARE_METRICS: {
         TIME_PERIOD: "TIME_PERIOD",
@@ -12,76 +17,139 @@ export const constants = {
         DISTANCE_TRAVELLED: "km",
     },
     SERVICE_MAINTENANCE_TYPES: {
-        LUBRICANTS: {
+        lubricants: {
             label: "Lubricants",
             subSections: [{
                 label: "Engine Oil",
-                value: "ENGINE_OIL"
+                value: "engineOil",
+                fields: [
+                    {
+                        label: "Oil",
+                        value: "oil",
+                        type: formFieldConstants.TEXT,
+                    }
+                ]
             },
             {
                 label: "Transmission Oil Auto/Man",
-                value: "TRANSMISSION_OIL_AUTO_MA"
+                value: "transmissionOilAutoMan",
+                fields: [{
+                        label: "Auto/Manual",
+                        value: "autoMan",
+                        type: formFieldConstants.RADIO_GROUP,
+                        radioValues: [
+                            { label: "Auto", value: "AUTO" },
+                            { label: "Manual", value: "MANUAL" }
+                        ]
+                    },
+                    {
+                        label: "Make",
+                        value: "make",
+                        type: formFieldConstants.TEXT,
+                    },
+                    {
+                        label: "Type",
+                        value: "type",
+                        type: formFieldConstants.TEXT,
+                    },
+                ]
             },
             {
                 label: "Differential Oil Front/Rear",
-                value: "DIFFERENTIAL_OIL_FRONT_REAR"
+                value: "differentialOilFrontRear",
+                fields: [
+                    {
+                        label: "Make",
+                        value: "make",
+                        type: formFieldConstants.TEXT,
+                    },
+                    {
+                        label: "Type",
+                        value: "type",
+                        type: formFieldConstants.TEXT,
+                    },
+                ]
             },
             {
                 label: "Power Steering Oil",
-                value: "POWER_STEERING_OIL"
+                value: "powerSteeringOil",
+                fields: [
+                    {
+                        label: "Make",
+                        value: "make",
+                        type: formFieldConstants.TEXT,
+                    },
+                    {
+                        label: "Type",
+                        value: "type",
+                        type: formFieldConstants.TEXT,
+                    },
+                ]
             },
             {
                 label: "Brake Fluid",
-                value: "brake_fluid"
+                value: "brakeFluid",
+                fields: [
+                    {
+                        label: "Make",
+                        value: "make",
+                        type: formFieldConstants.TEXT,
+                    },
+                    {
+                        label: "Type",
+                        value: "type",
+                        type: formFieldConstants.TEXT,
+                    },
+                ]
             },
             ]
         },
-        FLUIDS: {
+        fluids: {
             label: "Fluids",
             subSections: [{
                 label: "Clutch Fluid",
-                value: "CLUTCH_FLUID"
+                value: "clutchFluid"
             },
             {
                 label: "Radiator Coolant",
-                value: "RADIATOR_COOLANT"
+                value: "radiatorCoolant"
             },
             {
                 label: "Inverter Coolant",
-                value: "INVERTER_COOLANT"
+                value: "inverterCoolant"
             },
             {
                 label: "Battery Water",
-                value: "BATTERY_WATER"
+                value: "batteryWater"
             },
             {
                 label: "Windscreen Cleaner",
-                value: "WINDSCREEN_CLEANER"
+                value: "windscreenCleaner"
             },
             ]
         },
-        FILTERS: {
+        filters: {
             label: "Filters",
             subSections: [
                 {
                     label: "Oil Filter",
-                    value: "OIL_FILTER"
+                    value: "oilFilter"
                 },
                 {
                     label: "Fuel Filter",
-                    value: "FUEL_FILTER"
+                    value: "fuelFilter"
                 },
                 {
                     label: "Air Filter",
-                    value: "AIR_FILTER"
+                    value: "airFilter"
                 },
                 {
                     label: "Line Filter",
-                    value: "LINE_FILTER"
+                    value: "lineFilter"
                 },
                 {
                     label: "Cabin Filter",
-                    value: "CABIN_FILTER"
+                    value: "cabinFilter"
                 },
             ]
         },

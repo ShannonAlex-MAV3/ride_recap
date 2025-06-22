@@ -71,9 +71,6 @@ export const getRepairById = async (req: Request, res: Response) => {
 export const updateRepair = async (req: Request, res: Response) => {
     logger.info("Start: update repair by id: ", req.params.repairID);
 
-    console.log("req.body :", req.body)
-    console.log("req.files :", req.files)
-
     try {
         const repairId = parseInt(req.params.repairID, 10);
         if (isNaN(repairId)) {
@@ -84,8 +81,6 @@ export const updateRepair = async (req: Request, res: Response) => {
             ...req.body,
             attachments: req.files || []
         };
-
-        console.log("updatedRepair", updatedRepair)
 
         const repair = await repairService.updateRepair(repairId, updatedRepair);
         res.json(repair);
@@ -105,7 +100,20 @@ export const getAllRepairsWithDetails = async (req: Request, res: Response) => {
     logger.info("Start: get all the repairs with other details");
 
     try {
-        const repairs = await repairService.getAllRepairsWithRelationDetails();
+        // Extract query parameters
+        const { customerIds, vehicleLicensePlate } = req.query;
+
+        // Parse customer IDs if provided
+        const parsedCustomerIds = customerIds
+            ? Array.isArray(customerIds)
+                ? customerIds.map(id => parseInt(id as string))
+                : [parseInt(customerIds as string)]
+            : undefined;
+
+        const repairs = await repairService.getAllRepairsWithRelationDetails(
+            parsedCustomerIds,
+            vehicleLicensePlate as string | undefined
+        );
 
         res.json(repairs);
     } catch (error) {

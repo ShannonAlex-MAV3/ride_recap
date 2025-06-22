@@ -14,14 +14,15 @@ import { Pen } from "lucide-react";
 import { getStatusEnumColor, getStatusEnumValue } from "../common/Utils";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { fetchRepairsWithDetails } from "./Util";
+import { fetchRepairsWithDetails, RepairSearchFilters } from "./Util";
+import Search from "../services/Search";
 // import { useMasterStore } from "@/hooks/use-master-store";
 
 const RepairBase = () => {
   const [repairs, setRepairs] = useState<RepairWithDetails[]>([]);
 
-  const getRepairs = useCallback(async () => {
-    const response = await fetchRepairsWithDetails();
+  const getRepairs = useCallback(async (filters?: RepairSearchFilters) => {
+    const response = await fetchRepairsWithDetails(filters);
     setRepairs(response);
   }, []);
 
@@ -31,11 +32,16 @@ const RepairBase = () => {
 
   return (
     <>
-      <div className="flex items-center">
-        <h1 className="text-lg font-semibold md:text-2xl">Repair</h1>
-        <Button className="ml-4">
-          <Link to={`new`}>Add</Link>
-        </Button>
+      <div className="flex space-y-4 justify-between">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <h1 className="text-lg font-semibold md:text-2xl">Repair</h1>
+            <Button className="ml-4">
+              <Link to={`new`}>Add</Link>
+            </Button>
+          </div>
+        </div>
+        <Search onSearch={getRepairs} />
       </div>
       <div className="flex-grow p-4 items-center justify-center rounded-lg border border-dashed shadow-sm">
         <div>

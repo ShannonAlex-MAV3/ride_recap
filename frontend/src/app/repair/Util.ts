@@ -3,6 +3,11 @@ import apiService from "@/services/api-service";
 import { API_URLS } from "@/api";
 import { z } from "zod";
 
+export interface RepairSearchFilters {
+    customerIds?: number[];
+    vehicleLicensePlate?: string;
+}
+
 export const repairFormSchema = z.object({
     repairCode: z.string().nullable().optional(),
     customerId: z.string({
@@ -62,10 +67,29 @@ export const fetchRepairs = async (): Promise<Repair[]> => {
     return response;
 };
 
-export const fetchRepairsWithDetails = async (): Promise<RepairWithDetails[]> => {
-    console.log("fetchRepairsWithDetails")
+export const fetchRepairsWithDetails = async (filters?: RepairSearchFilters): Promise<RepairWithDetails[]> => {
+
+    // Construct URL parameters if filters are provided
+    let queryParams = '';
+
+    if (filters) {
+        const params = new URLSearchParams();
+
+        // Add customer IDs if present
+        if (filters.customerIds && filters.customerIds.length > 0) {
+            filters.customerIds.forEach(id => params.append('customerIds', id.toString()));
+        }
+
+        // Add vehicle license plate if present
+        if (filters.vehicleLicensePlate) {
+            params.append('vehicleLicensePlate', filters.vehicleLicensePlate);
+        }
+
+        queryParams = params.toString() ? `?${params.toString()}` : '';
+    }
+
     const response = await apiService.get(
-        API_URLS.getAllRepairsWithDetails,
+        `${API_URLS.getAllRepairsWithDetails}${queryParams}`,
         {
             toast: {
                 enabled: true,

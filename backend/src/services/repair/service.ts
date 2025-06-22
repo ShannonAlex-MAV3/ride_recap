@@ -239,10 +239,12 @@ export const updateRepair = async (repairID: number, repairData: any): Promise<R
   } as Repair;
 }
 
-export const getAllRepairsWithRelationDetails = async (): Promise<RepairWithDetails[]> => {
+export const getAllRepairsWithRelationDetails = async (customerIds?: number[], vehicleLicensePlate?: string): Promise<RepairWithDetails[]> => {
   logger.info("Start: Fetching all Repair records.");
+  logger.info(`Filters - customerIds: ${customerIds}, vehicleLicensePlate: ${vehicleLicensePlate}`);
 
-  const repairs = await prisma.$queryRaw<RepairWithDetails[]>
+  // const repairs = await prisma.$queryRaw<RepairWithDetails[]>
+  let sql =
     `
     SELECT 
       r."repairID",
@@ -265,10 +267,43 @@ export const getAllRepairsWithRelationDetails = async (): Promise<RepairWithDeta
     LEFT JOIN "Customer" c ON r."customerID" = c."customerID"
     LEFT JOIN "Vehicle" v ON r."vehicleID" = v."vehicleID"
     LEFT JOIN "JobConfig" j ON r."jobID" = j."jobID"
-    ORDER BY r."customerID" ASC
+    WHERE 1=1
     `;
 
-  logger.info(`Fetched ${repairs.length} Repair records.`);
+  const params: any[] = [];
 
-  return repairs as RepairWithDetails[];
+  // Add customerIds filter if provided
+  if (customerIds && customerIds.length > 0) {
+    sql += ` AND r."customerID" IN (${customerIds.map((_, i) => `$${i + 1}`).join(',')})`;
+    params.push(...customerIds);
+  }
+
+  // Add vehicle license plate filter if provided
+  if (vehicleLicensePlate) {
+    sql += ` AND v."licensePlate" ILIKE $${params.length + 1}`;
+    params.push(`%${vehicleLicensePlate}%`);
+  }
+
+  sql += ` ORDER BY r."repairID" DESC`;
+
+  // Execute the query with parameters
+  const repairs = await prisma.$queryRawUnsafe(sql, ...params);
+
+  // Group services and their attachments
+  const repairMap = new Map();
+
+  // Process raw results and group by repairID
+  for (const row of repairs as any[]) {
+    if (!repairMap.has(row.repairID)) {
+      repairMap.set(row.repairID, {
+        ...row,
+      });
+    }
+  }
+
+  const result = Array.from(repairMap.values());
+
+  logger.info(`Fetched ${result.length} Repair records.`);
+
+  return result as RepairWithDetails[];
 }

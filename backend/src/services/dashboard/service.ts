@@ -83,11 +83,11 @@ export const getMaintenanceTrend = async (): Promise<JobWiseAutoCare[]> => {
         `
             SELECT 
                 jb."jobName" AS "name",
-                COUNT(ac."autoCareID") AS "value"
-            FROM "AutoCare" AS ac
-            INNER JOIN "JobConfig" AS jb ON ac."jobID" = jb."jobID"
-            WHERE ac."status" = 'ACT'
-            GROUP BY ac."jobID", jb."jobName";
+                COUNT(r."repairID") AS "value"
+            FROM "Repair" r
+            INNER JOIN "JobConfig" AS jb ON r."jobID" = jb."jobID"
+            WHERE r."status" = 'ACT'
+            GROUP BY r."jobID", jb."jobName";
         `;
 
     // Convert BigInt values to numbers

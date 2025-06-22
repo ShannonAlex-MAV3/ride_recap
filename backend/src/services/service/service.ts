@@ -65,9 +65,11 @@ export const updateService = async (serviceID: number, serviceData: any): Promis
     // Fetch existing service attachments
     const existingService = await prisma.service.findUnique({
         where: { serviceID },
-        include: { attachments: {
-            where: { status: 'ACT' }
-        } }
+        include: {
+            attachments: {
+                where: { status: 'ACT' }
+            }
+        }
     });
 
     if (!existingService) {
@@ -90,92 +92,92 @@ export const updateService = async (serviceID: number, serviceData: any): Promis
         // Mark attachments that are not in the attachmenRefs in serviceData as inactive
         if (existingService.attachments.length > 0) {
             const referencesToKeep = serviceData.attachmentsRefs ? JSON.parse(serviceData.attachmentsRefs) : [];
-            
+
             const attachmentsToInactivate = existingService.attachments.filter(
-              attachment => !referencesToKeep.some((ref: string) => ref.includes(attachment.reference))
+                attachment => !referencesToKeep.some((ref: string) => ref.includes(attachment.reference))
             );
-            
+
             // Perform batch update instead of individual updates
             if (attachmentsToInactivate.length > 0) {
-              attachmentsToInactivate.forEach(attachment => {
-                logger.info(`Marking attachment with reference ${attachment.reference} as inactive`);
-              });
-              
-              // Execute updates in parallel instead of sequentially
-              await Promise.all(
-                attachmentsToInactivate.map(attachment => 
-                  prismaClient.serviceAttachment.update({
-                    where: { 
-                      serviceID_fileID_reference: {
-                        serviceID: serviceID,
-                        fileID: attachment.fileID,
-                        reference: attachment.reference
-                      }
-                    },
-                    data: {
-                      status: 'INA',
-                      updatedAt: new Date()
-                    }
-                  })
-                )
-              );
-              
-              logger.info(`Marked ${attachmentsToInactivate.length} attachments as inactive`);
+                attachmentsToInactivate.forEach(attachment => {
+                    logger.info(`Marking attachment with reference ${attachment.reference} as inactive`);
+                });
+
+                // Execute updates in parallel instead of sequentially
+                await Promise.all(
+                    attachmentsToInactivate.map(attachment =>
+                        prismaClient.serviceAttachment.update({
+                            where: {
+                                serviceID_fileID_reference: {
+                                    serviceID: serviceID,
+                                    fileID: attachment.fileID,
+                                    reference: attachment.reference
+                                }
+                            },
+                            data: {
+                                status: 'INA',
+                                updatedAt: new Date()
+                            }
+                        })
+                    )
+                );
+
+                logger.info(`Marked ${attachmentsToInactivate.length} attachments as inactive`);
             }
-          }
-      
-          // Add new attachments in parallel
-          if (newAttachments.length > 0) {
+        }
+
+        // Add new attachments in parallel
+        if (newAttachments.length > 0) {
             await Promise.all(
-              newAttachments.map(attachment => 
-                prismaClient.serviceAttachment.create({
-                  data: {
-                    serviceID,
-                    fileID: attachment.fileID,
-                    reference: attachment.reference,
-                    status: 'ACT',
-                    createdAt: new Date()
-                  }
-                })
-              )
+                newAttachments.map(attachment =>
+                    prismaClient.serviceAttachment.create({
+                        data: {
+                            serviceID,
+                            fileID: attachment.fileID,
+                            reference: attachment.reference,
+                            status: 'ACT',
+                            createdAt: new Date()
+                        }
+                    })
+                )
             );
             logger.info(`Added ${newAttachments.length} new attachments`);
-          }
-      
-          // Update the service record
-          const updated = await prismaClient.service.update({
+        }
+
+        // Update the service record
+        const updated = await prismaClient.service.update({
             where: { serviceID },
             data: {
-              currentMileage: parseInt(serviceData.currentMileage) || 0,
-              maintenance: JSON.parse(serviceData.maintenance),
-              status: serviceData.status,
-              updatedAt: new Date(),
+                currentMileage: parseInt(serviceData.currentMileage) || 0,
+                maintenance: JSON.parse(serviceData.maintenance),
+                status: serviceData.status,
+                updatedAt: new Date(),
             },
             include: {
-              attachments: {
-                where: { status: 'ACT' }
-              }
+                attachments: {
+                    where: { status: 'ACT' }
+                }
             },
-          });
-      
-          return updated;
         });
-    
-        const attachmentRefs = await Promise.all(
-            updatedService.attachments.map(async (att) => {
-                const url = await s3.getPresignedUrl(att.reference);
-                logger.info(`Generated presigned URL for attachment: ${att.reference}`);
-                return url;
-            })
-        );
-    
-        logger.info(`Service record with ID ${serviceID} updated successfully.`);
-        return {
-            ...updatedService,
-            attachmentRefs,
-            attachments: [],
-        } as Service;
-    }
+
+        return updated;
+    });
+
+    const attachmentRefs = await Promise.all(
+        updatedService.attachments.map(async (att) => {
+            const url = await s3.getPresignedUrl(att.reference);
+            logger.info(`Generated presigned URL for attachment: ${att.reference}`);
+            return url;
+        })
+    );
+
+    logger.info(`Service record with ID ${serviceID} updated successfully.`);
+    return {
+        ...updatedService,
+        attachmentRefs,
+        attachments: [],
+    } as Service;
+}
 
 
 export const getServiceById = async (serviceID: number): Promise<Service | null> => {
@@ -242,21 +244,21 @@ export const getAllServices = async (customerIds?: number[], vehicleLicensePlate
     `;
 
     const params: any[] = [];
-    
+
     // Add customerIds filter if provided
     if (customerIds && customerIds.length > 0) {
         sql += ` AND s."customerID" IN (${customerIds.map((_, i) => `$${i + 1}`).join(',')})`;
         params.push(...customerIds);
     }
-    
+
     // Add vehicle license plate filter if provided
     if (vehicleLicensePlate) {
         sql += ` AND v."licensePlate" ILIKE $${params.length + 1}`;
         params.push(`%${vehicleLicensePlate}%`);
     }
-    
+
     sql += ` ORDER BY s."serviceID" DESC`;
-    
+
     // Execute the query with parameters
     const services = await prisma.$queryRawUnsafe(sql, ...params);
 

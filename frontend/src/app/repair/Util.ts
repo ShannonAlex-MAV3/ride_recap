@@ -80,41 +80,36 @@ export const fetchRepairsWithDetails = async (): Promise<RepairWithDetails[]> =>
     return response;
 };
 
-export const AddRepair = async (data: Repair) => {
+export const AddRepair = async (formData: FormData) => {
     const response = await apiService.post(
         API_URLS.addRepair,
-        data,
+        formData,
         {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
             toast: {
                 enabled: true,
-                loading: {
-                    message: 'Adding Repair...',
-                },
-                success: {
-                    message: 'Repair added successfully',
-                },
-            }
+                loading: { message: "Updating Repair..." },
+                success: { message: "Repair updated successfully" },
+            },
         })
     return response;
 };
 
-export const updateRepair = async (repairID: number, data: Repair) => {
+export const updateRepair = async (repairID: number, formData: FormData) => {
     const response = await apiService.put(
         API_URLS.updateRepair(repairID),
-        data,
+        formData,
         {
             headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "multipart/form-data",
             },
             toast: {
                 enabled: true,
-                loading: {
-                    message: 'Updating Repair...',
-                },
-                success: {
-                    message: 'Repair updated successfully',
-                },
-            }
+                loading: { message: "Updating Repair..." },
+                success: { message: "Repair updated successfully" },
+            },
         })
     return response;
 };

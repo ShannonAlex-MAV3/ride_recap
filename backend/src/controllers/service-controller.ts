@@ -4,8 +4,6 @@ import { Request, Response } from "express";
 import { Service } from "../@types";
 import { buffer } from "stream/consumers";
 
-
-
 export const getAllServices = async (req: Request, res: Response) => {
     logger.info("Start: get all the services");
     try {

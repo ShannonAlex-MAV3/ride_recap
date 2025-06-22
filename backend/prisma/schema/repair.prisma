@@ -10,4 +10,19 @@ model Repair {
     status         StatusP   @default(ACT)
     createdAt      DateTime  @default(now())
     updatedAt      DateTime?
+
+    attachments    RepairAttachment[]
+}
+
+model RepairAttachment {
+    repairID Int
+    fileID    Int
+    reference String
+    status    StatusP @default(ACT)
+    createdAt DateTime @default(now())
+    updatedAt DateTime?
+
+    Repair   Repair @relation(fields: [repairID], references: [repairID])
+
+    @@id([repairID, fileID, reference])
 }

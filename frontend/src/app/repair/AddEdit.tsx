@@ -30,8 +30,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { getVehiclesByCustomerId } from "../customer/Util";
+import FileUpload from "@/components/file-upload/FileUpload";
 
 type FormValues = z.infer<typeof repairFormSchema>;
 
@@ -53,6 +54,7 @@ const AddEditRepair = () => {
     isLoadingJobs,
     isLoadingMechanics,
   } = useMasterStore();
+  const [files, setFiles] = useState<File[]>([]);
 
   const repairForm = useForm<FormValues>({
     resolver: zodResolver(repairFormSchema),
@@ -109,6 +111,7 @@ const AddEditRepair = () => {
       } catch (error) {
         console.error("Error loading repair:", error);
       } finally {
+        setFiles([]);
         setIsLoading(false);
       }
     };
@@ -130,36 +133,49 @@ const AddEditRepair = () => {
     fetchVehicles();
   }, [repairForm.getValues("customerId")]);
 
-  const { isSubmitting  } = repairForm.formState;
+  const { isSubmitting } = repairForm.formState;
   const isNew = !repair;
 
   const onSubmit = async (_d: FormValues) => {
     const values = repairForm.getValues();
 
-    // Build a plain object with the fields
-    const payload: Repair = {
-      customerID: Number(values.customerId),
-      vehicleID: Number(values.vehicleId),
-      jobID: Number(values.jobId),
-      mechanicID: Number(values.mechanicId),
-      currentMileage: Number(values.currentMileage ?? 0),
-      total: values.total !== undefined ? Number(values.total) : undefined,
-      status: values.status || "ACT",
-    };
+    const formData = new FormData();
+
+    // Basic fields
+    formData.append("customerID", values.customerId);
+    formData.append("vehicleID", values.vehicleId);
+    formData.append("jobID", values.jobId);
+    formData.append("mechanicID", values.mechanicId);
+    formData.append("currentMileage", values.currentMileage?.toString() ?? "0");
+    formData.append("total", values.total?.toString() ?? "0");
+    formData.append("status", values.status || "ACT");
+
+    // Attachments (files uploaded)
+    files.forEach((file) => {
+      formData.append("attachments", file);
+    });
+
+    // Reference strings (existing attachments you're keeping)
+    formData.append(
+      "attachmentsRefs",
+      JSON.stringify(repair?.attachmentRefs || [])
+    );
 
     if (!isNew && repair?.repairID) {
       // Add repairID and repairCode when editing
-      payload.repairID = repair.repairID;
-      payload.repairCode = repair.repairCode ?? "";
+      formData.append("repairID", repair.repairID.toString());
+      formData.append("repairCode", repair.repairCode ?? "");
 
-      const response = await updateRepair(repair.repairID, payload);
+      const response = await updateRepair(repair.repairID, formData);
+
       if (response) {
         setRepair(response);
       }
     } else {
-      const response = await AddRepair(payload);
+      // Creating new repair
+      const response = await AddRepair(formData);
       if (response) {
-        // Reset the form with the new repairCode
+
         repairForm.setValue("repairCode", response.repairCode, {
           shouldValidate: true,
           shouldDirty: false,
@@ -413,6 +429,16 @@ const AddEditRepair = () => {
                         <FormMessage />
                       </FormItem>
                     )}
+                  />
+                  {/* File Upload */}
+                  <FileUpload
+                    label="Upload Receipts & Attachments"
+                    files={files}
+                    onUploadFile={(files: File[]) =>
+                      setFiles((prev) => [...prev, ...files])
+                    }
+                    fileRefs={repair?.attachmentRefs || []}
+                    disabled={repairForm.formState.disabled || isSubmitting}
                   />
                   <FormField
                     control={repairForm.control}

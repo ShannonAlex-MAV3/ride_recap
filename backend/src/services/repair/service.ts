@@ -1,7 +1,7 @@
 import { Repair, RepairWithDetails } from '../../@types';
 import logger from '../../logger';
 import { PrismaClient } from "@prisma/client";
-import { generateUniqueRepairCode } from './support';
+import { generateUniqueRepairCode, notifyRepairCreation, prepareHTMLContentForRepair } from './support';
 import { getS3Service } from '../storage/storage';
 
 const prisma = new PrismaClient();
@@ -66,6 +66,26 @@ export const addRepair = async (repairData: any): Promise<Repair> => {
       return url;
     })
   );
+
+  // Move to a helper method
+  const customer = await prisma.customer.findUnique({
+    where: { customerID: newRepair.customerID },
+    select: { email: true },
+  });
+
+  if (customer?.email) {
+    const emailHTMLContent = await prepareHTMLContentForRepair(newRepair);
+
+    console.log("emailHTMLContent", emailHTMLContent)
+
+    if (emailHTMLContent) {
+      await notifyRepairCreation(customer.email, emailHTMLContent);
+    } else {
+      logger.warn(`Failed to prepare HTML content for repair: ${newRepair.repairCode}`);
+    }
+  } else {
+    logger.warn(`No email found for customerID: ${newRepair.customerID}`);
+  }
 
   logger.info(`Repair record created successfully with code: ${repairCode}`);
   // Parse or cast the metricConfig to match AutoCare type

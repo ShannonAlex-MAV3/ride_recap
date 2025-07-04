@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { randomBytes } from "crypto";
 import logger from "../../logger";
 import { sendEmail } from "../common/emailService";
-import { Repair, RepairEmail } from "../../@types";
+import { EmailTypeConst, Repair, RepairEmail } from "../../@types";
 
 const prisma = new PrismaClient();
 
@@ -36,7 +36,7 @@ export const notifyRepairCreation = async (sendTo: string, repairMailDetails: Re
   try {
     await sendEmail({
       to: sendTo,
-      type: 'REPAIR', //TODO add to type
+      type: EmailTypeConst.REPAIR,
       data: { ...repairMailDetails },
       subject: `Repair Summary for ${repairMailDetails.licensePlate}`,
       html: true,
@@ -49,7 +49,7 @@ export const notifyRepairCreation = async (sendTo: string, repairMailDetails: Re
 
 export const prepareHTMLContentForRepair = async (repair: Repair) => {
 
-  const { customerID, vehicleID, jobID, repairCode, total } = repair;
+  const { customerID, vehicleID, jobID, repairCode, total, currentMileage } = repair;
 
   let customerSql =
     `
@@ -78,9 +78,6 @@ export const prepareHTMLContentForRepair = async (repair: Repair) => {
   const customerWithVehicleDetails = await prisma.$queryRawUnsafe<any>(customerSql, customerID, vehicleID);
   const jobDetails = await prisma.$queryRawUnsafe<any>(jobSql, jobID);
 
-  console.log("customerWithVehicleDetails", customerWithVehicleDetails)
-  console.log("jobDetails", jobDetails)
-
   if (!customerWithVehicleDetails.length || !jobDetails.length) return null;
 
   const customer = customerWithVehicleDetails[0];
@@ -95,6 +92,7 @@ export const prepareHTMLContentForRepair = async (repair: Repair) => {
     licensePlate: customer.licensePlate,
     vehicleMakeModel: vehicleMakeModel,
     jobName: job.jobName,
+    currentMileage: currentMileage ?? 0,
     total: total ?? 0,
   };
 

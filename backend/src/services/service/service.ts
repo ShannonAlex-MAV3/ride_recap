@@ -2,7 +2,7 @@ import { url } from 'inspector';
 import { Service, ServiceWithDetails } from '../../@types';
 import logger from '../../logger';
 import { getS3Service } from '../storage/storage';
-import { generateUniqueServiceCode } from './support';
+import { generateUniqueServiceCode, prepareHTMLContentForService, notifyServiceCreation } from './support';
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -49,7 +49,30 @@ export const addService = async (serviceData: any) => {
             return url;
         })
     );
+
+    // Move to a helper method
+    const customer = await prisma.customer.findUnique({
+        where: { customerID: newService.customerID },
+        select: { email: true },
+    });
+
+    if (customer?.email) {
+        const emailHTMLContent = await prepareHTMLContentForService({
+            ...newService,
+            maintenance: newService.maintenance ?? [],
+        } as Service);
+
+        if (emailHTMLContent) {
+            await notifyServiceCreation(customer.email, emailHTMLContent);
+        } else {
+            logger.warn(`Failed to prepare HTML content for Service: ${newService.serviceCode}`);
+        }
+    } else {
+        logger.warn(`No email found for customerID: ${newService.customerID}`);
+    }
+
     logger.info(`Service record created successfully with code: ${serviceCode}`);
+
     return {
         ...newService,
         attachments: [],
@@ -278,3 +301,12 @@ export const getAllServices = async (customerIds?: number[], vehicleLicensePlate
     logger.info(`Fetched ${result.length} Service records with details.`);
     return result as ServiceWithDetails[];
 }
+
+/* export const testServiceEmail = async (serviceID: number) => {
+    logger.info(`Start: email testing for service: ${serviceID}`);
+
+
+    await testEmailGeneration(serviceID);
+
+    logger.info(`End: email testing for service: ${serviceID}`);
+} */

@@ -76,8 +76,6 @@ export const addRepair = async (repairData: any): Promise<Repair> => {
   if (customer?.email) {
     const emailHTMLContent = await prepareHTMLContentForRepair(newRepair);
 
-    console.log("emailHTMLContent", emailHTMLContent)
-
     if (emailHTMLContent) {
       await notifyRepairCreation(customer.email, emailHTMLContent);
     } else {

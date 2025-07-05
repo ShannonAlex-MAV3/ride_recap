@@ -25,9 +25,10 @@ services:
       context: ./backend
       dockerfile: Dockerfile.dev
     container_name: ride_recap_backend_dev
+    env_file:
+      - backend/.env
     environment:
       NODE_ENV: development
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-ride_recap_dev}
       PORT: 8080
     ports:
       - "8080:8080"
@@ -56,6 +57,22 @@ services:
     environment:
       - VITE_API_URL=http://localhost:8080
     command: npm run dev
+
+  # Database migrations (run once) - Development
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: ride_recap_migrate_dev
+    env_file:
+      - backend/.env
+    command: npx prisma migrate deploy
+    volumes:
+      - ./backend/prisma:/app/prisma
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
 
 volumes:
   postgres_data_dev:

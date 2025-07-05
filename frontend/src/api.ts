@@ -23,7 +23,7 @@ export const API_URLS = {
     getAllRepairs: `/repair`,
     getAllRepairsWithDetails: `/repair/getAllRepairsWithDetails`,
     addRepair: `/repair/save`,
-    updateRepair: `/repair/update`,
+    updateRepair: (repairID: number) => `/repair/update/${repairID}`,
     getRepairById: (repairID: number) => `/repair/${repairID}`,
 
     // Mechanic URLS

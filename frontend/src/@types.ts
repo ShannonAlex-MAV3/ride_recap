@@ -73,7 +73,10 @@ export interface Repair {
   vehicleID: number;
   jobID: number;
   currentMileage: number;
+  total?: number;
   mechanicID: number;
+  attachments?: File[];
+  attachmentRefs?: string[];
   status: string;
   createdAt?: Date;
   updatedAt?: Date | null;
@@ -110,8 +113,8 @@ export type RepairWithDetails = {
   repairCode: string;
   customerID: number;
   firstName: string;
-  lastName: string; 
-  customerCode: string; 
+  lastName: string;
+  customerCode: string;
   vehicleID: number;
   licensePlate: string;
   jobID: number;

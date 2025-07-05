@@ -1,0 +1,228 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Car Service Record</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        background-color: #444;
+        color: white;
+        padding: 20px;
+        text-align: center;
+      }
+      .content {
+        padding: 20px;
+      }
+      .service-summary {
+        background-color: #f9f9f9;
+        border-left: 4px solid #7ec242;
+        padding: 15px;
+        margin: 20px 0;
+      }
+      .service-summary h3 {
+        margin-top: 0;
+        color: #444;
+      }
+      .service-grid {
+        display: grid;
+        gap: 15px;
+        margin: 20px 0;
+      }
+      .service-category {
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .category-header {
+        padding: 10px 15px;
+        font-weight: bold;
+        color: white;
+        text-align: center;
+      }
+      .lubricants {
+        background-color: #7ec242;
+      }
+      .fluids {
+        background-color: #96daf5;
+      }
+      .filters {
+        background-color: #00a2d4;
+      }
+      .service-info {
+        background-color: #444;
+      }
+
+      .category-content {
+        padding: 15px;
+        background-color: white;
+      }
+      .service-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+      }
+      .service-item:last-child {
+        border-bottom: none;
+      }
+      .service-item strong {
+        color: #444;
+      }
+      .status {
+        font-weight: bold;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+      }
+      .status.replaced {
+        background-color: #ffebee;
+        color: #c62828;
+      }
+      .status.checked {
+        background-color: #e8f5e8;
+        color: #2e7d32;
+      }
+      .status.cleaned {
+        background-color: #fff3e0;
+        color: #ef6c00;
+      }
+      .status.na {
+        background-color: #f5f5f5;
+        color: #666;
+      }
+      .status.topUp {
+        background-color: #e3f2fd;
+        color: #0277bd;
+      }
+
+      .legend {
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 6px;
+        margin-top: 20px;
+        font-size: 14px;
+      }
+      .footer {
+        background-color: #f9f9f9;
+        padding: 20px;
+        text-align: center;
+        color: #666;
+      }
+
+      /* Mobile optimizations */
+      @media (max-width: 600px) {
+        body {
+          padding: 10px;
+        }
+        .container {
+          margin: 0;
+        }
+        .content {
+          padding: 15px;
+        }
+        .service-item {
+          flex-direction: column;
+          gap: 5px;
+        }
+        .service-item span {
+          text-align: right;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Service Record</h1>
+        <p>MC Auto Service</p>
+      </div>
+
+      <div class="content">
+        <p>Dear <strong>{{customerName}}</strong>,</p>
+        <p>Thank you for choosing us for your vehicle care. Below are the
+          details of your recent service for your vehicle
+          <strong>{{licensePlate}}</strong>:</p>
+
+        <div class="service-summary">
+          <h3>Service Summary</h3>
+          <p><strong>Date:</strong> {{serviceDate}}</p>
+          <p><strong>Current Odometer:</strong> {{currentMileage}} KM</p>
+          <p><strong>Next Service Due:</strong> {{nextInterimService}} KM</p>
+          <p><strong>Total Amount:</strong> Rs. {{total}}</p>
+          <p><strong>Notes:</strong>{{note}}</p>
+        </div>
+
+        <div class="service-grid">
+          <div class="service-category">
+            <div class="category-header lubricants">Lubricants</div>
+            <div class="category-content">
+
+              {{#each maintenance.lubricants}}
+                <div class="service-item">
+                  <span><strong>{{lookup ../maintenanceLabelMap @key}}:</strong></span>
+                  <span class="status {{lookup ../statusMap this.values.[0]}}">
+                    {{this.values.[0]}} - {{lookup ../legend this.values.[0]}}
+                  </span>
+                </div>
+              {{/each}}
+              
+            </div>
+          </div>
+
+          <div class="service-category">
+            <div class="category-header fluids">Fluids</div>
+            <div class="category-content">
+
+              {{#each maintenance.fluids}}
+                <div class="service-item">
+                  <span><strong>{{lookup ../maintenanceLabelMap @key}}:</strong></span>
+                  <span class="status {{lookup ../statusMap this.[0]}}">{{this.[0]}} - {{lookup ../legend this.[0]}}</span>
+                </div>
+              {{/each}}
+
+            </div>
+          </div>
+
+          <div class="service-category">
+            <div class="category-header filters">Filters</div>
+            <div class="category-content">
+
+              {{#each maintenance.filters}}
+                <div class="service-item">
+                  <span><strong>{{lookup ../maintenanceLabelMap @key}}:</strong></span>
+                  <span class="status {{lookup ../statusMap this.[0]}}">{{this.[0]}} - {{lookup ../legend this.[0]}}</span>
+                </div>
+              {{/each}}
+
+            </div>
+          </div>
+        </div>
+
+        <div class="legend">
+          <strong>Legend:</strong>
+          R = Replace, T = Top up, C = Clean, S = Service, Y = Check
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>We appreciate your business and look forward to serving you again.</p>
+        <p>Drive safe and see you next time!</p>
+        <p><em>MC Auto Service Team</em></p>
+      </div>
+    </div>
+  </body>
+</html>

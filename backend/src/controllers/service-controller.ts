@@ -4,8 +4,6 @@ import { Request, Response } from "express";
 import { Service } from "../@types";
 import { buffer } from "stream/consumers";
 
-
-
 export const getAllServices = async (req: Request, res: Response) => {
     logger.info("Start: get all the services");
     try {
@@ -103,3 +101,23 @@ export const updateService = async (req: Request, res: Response) => {
     }
     logger.info("End: update service by id.");
 }
+
+/* export const testServiceEmail = async (req: Request, res: Response) => {
+
+    try {
+        const serviceId = parseInt(req.params.serviceID, 10);
+        if (isNaN(serviceId)) {
+            return res.status(400).json({ message: "Invalid service ID" });
+        }
+        const service = await serviceService.testServiceEmail(serviceId);
+        res.json(service);
+    } catch (error) {
+        if (error instanceof Error) {
+            res.status(500).json({ message: error.message });
+        } else {
+            res.status(500).json({ message: "An unknown error occurred" });
+        }
+        logger.error("Error", { message: (error as Error).message, stack: (error as Error).stack });
+    }
+}
+ */

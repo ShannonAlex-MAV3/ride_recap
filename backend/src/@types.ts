@@ -79,6 +79,10 @@ export type Service = {
   mechanicID: number;
   attachments?: any;
   attachmentRefs?: string[];
+  serviceDate: string | Date;
+  total?: number | 0;
+  nextInterimService?: number | null;
+  note?: string | null;
   status?: StatusP;
   createdAt?: Date;
   updatedAt?: Date | null;
@@ -110,6 +114,9 @@ export type Repair = {
   jobID: number;
   currentMileage: number;
   mechanicID?: number;
+  total: number | null;
+  attachments?: any;
+  attachmentRefs?: string[];
   status?: StatusP;
   createdAt?: Date;
   updatedAt?: Date | null;
@@ -120,8 +127,8 @@ export type RepairWithDetails = {
   repairCode: string;
   customerID: number;
   firstName: string;
-  lastName: string; 
-  customerCode: string; 
+  lastName: string;
+  customerCode: string;
   vehicleID: number;
   licensePlate: string;
   jobID: number;
@@ -139,8 +146,8 @@ export type ServiceWithDetails = {
   serviceCode: string;
   customerID: number;
   firstName: string;
-  lastName: string; 
-  customerCode: string; 
+  lastName: string;
+  customerCode: string;
   vehicleID: number;
   licensePlate: string;
   make: string;
@@ -156,3 +163,34 @@ export type ServiceWithDetails = {
   createdAt?: Date;
   updatedAt?: Date | null;
 }
+
+export type EmailType = 'REPAIR' | 'AUTO_CARE';
+
+export const EmailTypeConst = {
+  REPAIR: 'REPAIR',
+  AUTO_CARE: 'AUTO_CARE',
+} as const;
+
+export type RepairEmail = {
+  repairCode: string;
+  customerName: string;
+  licensePlate: string;
+  vehicleMakeModel?: string | null;
+  jobName: string;
+  currentMileage: number;
+  total: number;
+}
+
+export type ServiceEmail = {
+  serviceCode: string;
+  customerName: string;
+  licensePlate: string;
+  total: number;
+  currentMileage: number;
+  nextInterimService: number;
+  serviceDate: string
+  note: string;
+  maintenance: any[];
+}
+
+

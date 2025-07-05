@@ -26,7 +26,10 @@ export const saveRepair = async (req: Request, res: Response) => {
     logger.info("Start: create new repair.");
 
     try {
-        const newRepair: Repair = req.body;
+        const newRepair: Repair = {
+            ...req.body,
+            attachments: req.files || [],
+        };
         const repair = await repairService.addRepair(newRepair);
 
         res.status(201).json(repair); // TODO:Add this to other save calls
@@ -74,7 +77,11 @@ export const updateRepair = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "Invalid repair ID" });
         }
 
-        const updatedRepair: Repair = req.body;
+        const updatedRepair: Repair = {
+            ...req.body,
+            attachments: req.files || []
+        };
+
         const repair = await repairService.updateRepair(repairId, updatedRepair);
         res.json(repair);
     } catch (error) {
@@ -93,7 +100,20 @@ export const getAllRepairsWithDetails = async (req: Request, res: Response) => {
     logger.info("Start: get all the repairs with other details");
 
     try {
-        const repairs = await repairService.getAllRepairsWithRelationDetails();
+        // Extract query parameters
+        const { customerIds, vehicleLicensePlate } = req.query;
+
+        // Parse customer IDs if provided
+        const parsedCustomerIds = customerIds
+            ? Array.isArray(customerIds)
+                ? customerIds.map(id => parseInt(id as string))
+                : [parseInt(customerIds as string)]
+            : undefined;
+
+        const repairs = await repairService.getAllRepairsWithRelationDetails(
+            parsedCustomerIds,
+            vehicleLicensePlate as string | undefined
+        );
 
         res.json(repairs);
     } catch (error) {

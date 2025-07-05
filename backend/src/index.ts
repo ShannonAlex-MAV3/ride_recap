@@ -34,6 +34,15 @@ app.get("/api", (req: Request, res: Response) => {
   res.json({ message: "Hello from the backend!" });
 });
 
+// Health check endpoint for Docker
+app.get("/health", (req: Request, res: Response) => {
+  res.status(200).json({ 
+    status: "healthy", 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
 app.use("/api", jobRoutes);
 app.use("/api", customerRoutes);
 app.use("/api", dashboardRoutes);

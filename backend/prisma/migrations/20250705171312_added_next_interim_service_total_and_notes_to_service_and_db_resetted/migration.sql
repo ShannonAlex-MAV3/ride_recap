@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Service" ADD COLUMN     "nextInterimService" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "notes" TEXT,
+ADD COLUMN     "total" DOUBLE PRECISION DEFAULT 0;

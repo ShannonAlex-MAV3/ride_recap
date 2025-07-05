@@ -23,6 +23,7 @@ import { z } from "zod";
 import { constants, formFieldConstants } from "../../constants";
 import { getVehiclesByCustomerId } from "../customer/Util";
 import { defaultFormValues, fetchServiceById, saveService, serviceFormSchema, updateService } from "./util";
+import { Textarea } from "@/components/ui/textarea";
 
 type FormValues = z.infer<typeof serviceFormSchema>;
 
@@ -73,7 +74,10 @@ const AddEditService = () => {
             vehicleID: String(response.vehicleID),
             mechanicID: String(response.mechanicID),
             currentMileage: response.currentMileage,
+            nextInterimServiceMilage: response.nextInterimService,
+            notes: response.notes || "",
             serviceDate: new Date(response.serviceDate),
+            totalAmt: response.total || 0,
             maintenance: response.maintenance || defaultFormValues.maintenance,
             status: (response.status as "ACT" | "INA") || "ACT",
           });
@@ -103,9 +107,8 @@ const AddEditService = () => {
     fetchVehicles();
   }, [serviceForm.getValues("customerID")]);
 
-  const onSubmit = async (_d: FormValues) => {
+  const onSubmit = async () => {
     const data = serviceForm.getValues();
-    console.log("Form submitted with data:", data);
     const formData = new FormData();
 
     // Add basic fields
@@ -113,9 +116,12 @@ const AddEditService = () => {
     formData.append("vehicleID", data.vehicleID);
     formData.append("mechanicID", data.mechanicID);
     formData.append("currentMileage", data.currentMileage?.toString() ?? "0");
+    formData.append("nextInterimService", data.nextInterimServiceMilage?.toString() ?? "0");
+    formData.append("notes", data.notes || "");
     formData.append("serviceDate", data.serviceDate.toISOString());
     formData.append("status", data.status || "ACT");
     formData.append("maintenance", JSON.stringify(data.maintenance));
+    formData.append("total", data.totalAmt?.toString() || "0");
 
     // Append files
     files.forEach((file) => {
@@ -176,7 +182,7 @@ const AddEditService = () => {
                   label={field.label}
                   type="text"
                   placeholder={'Type here...'}
-                  disabled={serviceForm.formState.disabled}
+                  disabled={serviceForm.formState.disabled || !isNew}
                 />
               );
             case formFieldConstants.RADIO_GROUP:
@@ -274,7 +280,36 @@ const AddEditService = () => {
                   label="Current Mileage (km)"
                   type="number"
                   placeholder="Enter current mileage"
-                  disabled={serviceForm.formState.disabled || isSubmitting}
+                  required={true}
+                  disabled={serviceForm.formState.disabled || isSubmitting || !isNew}
+                  inputProps={{
+                    min: 0,
+                  }}
+                />
+
+                {/* Next Interim Service Mileage */}
+                <FormInput
+                  form={serviceForm}
+                  name="nextInterimServiceMilage"
+                  label="Next Interim Service Mileage (km)"
+                  type="number"
+                  placeholder="Enter next interim service mileage"
+                  required={true}
+                  disabled={serviceForm.formState.disabled || isSubmitting || !isNew}
+                  inputProps={{
+                    min: 0,
+                  }}
+                />
+
+                {/* Total amount */}
+                <FormInput
+                  form={serviceForm}
+                  name="totalAmt"
+                  label="Total Amount (LKR)"
+                  type="number"
+                  required={true}
+                  placeholder="Enter total amount"
+                  disabled={serviceForm.formState.disabled || isSubmitting || !isNew}
                   inputProps={{
                     min: 0,
                   }}
@@ -290,7 +325,7 @@ const AddEditService = () => {
                         Service Date <span className="text-red-500">*</span>
                       </FormLabel>
                       <Popover>
-                        <PopoverTrigger disabled={serviceForm.formState.disabled} asChild>
+                        <PopoverTrigger disabled={serviceForm.formState.disabled || !isNew} asChild>
                           <FormControl>
                             <Button
                               variant={"outline"}
@@ -353,7 +388,7 @@ const AddEditService = () => {
                                   id: key,
                                   label: value,
                                 }))}
-                                disabled={serviceForm.formState.disabled || isSubmitting}
+                                disabled={serviceForm.formState.disabled || isSubmitting|| !isNew}
                               />
                               {/* Additional maintenance fields Fields */}
                               {/* @ts-expect-error some sections may not have fields */}
@@ -374,7 +409,27 @@ const AddEditService = () => {
                   files={files}
                   onUploadFile={(files: File[]) => setFiles((prev) => [...prev, ...files])}
                   fileRefs={service?.attachmentRefs || []}
-                  disabled={serviceForm.formState.disabled || isSubmitting}
+                  disabled={serviceForm.formState.disabled || isSubmitting || !isNew}
+                />
+
+                {/* notes */}
+                <FormField
+                  control={serviceForm.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel>Notes</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Enter any additional notes here..."
+                          disabled={isSubmitting}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
 
                 {/* Status */}

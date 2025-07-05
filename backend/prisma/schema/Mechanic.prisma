@@ -1,16 +1,16 @@
 model Mechanic {
-    mechanicID   Int          @id @default(autoincrement())
-    nic          String       @unique
-    firstName    String
-    lastName     String?
-    phone        String?
-    mechanicType MechanicType
-    status       StatusP      @default(ACT)
-    createdAt    DateTime     @default(now())
-    updatedAt    DateTime?
+  mechanicID   Int          @id @default(autoincrement())
+  nic          String       @unique
+  firstName    String
+  lastName     String?
+  phone        String?
+  mechanicType MechanicType
+  status       StatusP      @default(ACT)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime?
 }
 
 enum MechanicType {
-    MM // Main Mechanic
-    SM // Main Mechanic
+  MM
+  SM
 }

@@ -1,9 +1,9 @@
 model File {
-  id         Int      @id @default(autoincrement())
-  reference  String   @unique
-  filename   String
-  mimetype   String
-  status     StatusP  @default(ACT)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  reference String   @unique
+  filename  String
+  mimetype  String
+  status    StatusP  @default(ACT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -141,6 +141,9 @@ export type Service = {
   mechanicID?: number;
   attachments?: File[];
   attachmentRefs?: string[];
+  total?: number | null;
+  nextInterimService?: number;
+  notes?: string;
   status?: string;
   createdAt?: string;
   updatedAt?: string | null;

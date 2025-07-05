@@ -82,7 +82,7 @@ export type Service = {
   serviceDate: string | Date;
   total?: number | 0;
   nextInterimService?: number | null;
-  note?: string | null;
+  notes?: string | null;
   status?: StatusP;
   createdAt?: Date;
   updatedAt?: Date | null;

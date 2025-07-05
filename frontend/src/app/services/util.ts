@@ -68,6 +68,18 @@ export const serviceFormSchema = z.object({
       invalid_type_error: "Please enter a valid number",
     })
     .nonnegative("Mileage cannot be negative"),
+    nextInterimServiceMilage: z.coerce
+    .number({
+      required_error: "Please enter next interim mileage",
+      invalid_type_error: "Please enter a valid number",
+    })
+    .nonnegative("Mileage cannot be negative"),
+     totalAmt: z.coerce
+    .number({
+      required_error: "Please enter total amount",
+      invalid_type_error: "Please enter a valid number",
+    })
+    .nonnegative("Mileage cannot be negative"),
   serviceDate: z.coerce
     .date({
       required_error: "Please select a service date",
@@ -78,7 +90,15 @@ export const serviceFormSchema = z.object({
     fluids: fluidsSchema,
     filters: filtersSchema,
   }),
+  notes: z.string().optional(),
   status: z.enum(["ACT", "INA"]).optional(),
+}).refine((data) => {
+  if (data.nextInterimServiceMilage !== undefined && data.currentMileage !== undefined) {
+    return data.nextInterimServiceMilage > data.currentMileage;
+  }
+}, {
+  message: "Next interim service mileage must be greater than current mileage",
+  path: ["nextInterimServiceMilage"],
 })
 
 export const defaultFormValues = {
@@ -87,6 +107,9 @@ export const defaultFormValues = {
       vehicleID: undefined,
       mechanicID: "",
       currentMileage: undefined,
+      nextInterimServiceMilage: undefined,
+      totalAmt: undefined,
+      notes: undefined,
       serviceDate: new Date(),
       maintenance: {
         lubricants: {

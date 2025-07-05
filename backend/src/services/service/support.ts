@@ -38,7 +38,7 @@ export const createAutoCareCode = (latestID: number): string => {
 export const prepareHTMLContentForService = async (service: Service) => {
 
   const { customerID, vehicleID, serviceCode, currentMileage, maintenance,
-    serviceDate, total, nextInterimService, note } = service;
+    serviceDate, total, nextInterimService, notes } = service;
 
   let customerSql =
     `
@@ -72,7 +72,7 @@ export const prepareHTMLContentForService = async (service: Service) => {
     currentMileage: currentMileage,
     nextInterimService: nextInterimService ?? 0,
     serviceDate: formattedDate,
-    note: note ?? " -",
+    note: notes ?? " -",
     maintenance: maintenance,
   };
 

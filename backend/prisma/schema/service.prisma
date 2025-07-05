@@ -1,29 +1,30 @@
 model Service {
-    serviceID     Int       @id @default(autoincrement())
-    serviceCode   String    @unique
-    customerID     Int
-    vehicleID      Int
-    currentMileage Int
-    serviceDate   DateTime @default(now())
-    mechanicID     Int
-    maintenance    Json
-    status         StatusP   @default(ACT)
-    createdAt      DateTime  @default(now())
-    updatedAt      DateTime?
-
-    attachments    ServiceAttachment[]
+  serviceID          Int                 @id @default(autoincrement())
+  serviceCode        String              @unique
+  customerID         Int
+  vehicleID          Int
+  currentMileage     Int
+  mechanicID         Int
+  maintenance        Json
+  status             StatusP             @default(ACT)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime?
+  serviceDate        DateTime            @default(now())
+  notes              String?
+  nextInterimService Int                 @default(0)
+  total              Float?              @default(0)
+  attachments        ServiceAttachment[]
 }
 
-
 model ServiceAttachment {
-    serviceID Int
-    fileID    Int
-    reference String
-    status    StatusP @default(ACT)
-    createdAt DateTime @default(now())
-    updatedAt DateTime?
+  serviceID Int
+  fileID    Int
+  reference String
+  status    StatusP   @default(ACT)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
 
-    Service   Service @relation(fields: [serviceID], references: [serviceID])
+  Service Service @relation(fields: [serviceID], references: [serviceID])
 
-    @@id([serviceID, fileID, reference])
+  @@id([serviceID, fileID, reference])
 }

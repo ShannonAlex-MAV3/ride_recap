@@ -29,7 +29,7 @@ export const sendEmail = async ({ to, subject, data, type, html, templateName }:
 
     try {
         const response = await resend.emails.send({
-            from: 'Ride-Recap <onboarding@resend.dev>', // TODO: change when production current dev testing purpose
+            from: process.env.EMAIL_FROM || 'Ride-Recap <onboarding@resend.dev>', // TODO: change when production current dev testing purpose
             to: 'yomal.2018471@iit.ac.lk',  // TODO: change when production current dev testing purpose
             subject: emailSubject,
             html: emailHtml,

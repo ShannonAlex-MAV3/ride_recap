@@ -1,9 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import { randomBytes } from "crypto";
-import { EmailTypeConst, Service, SERVICE_MAINTENANCE_TYPES, ServiceEmail } from "../../@types";
+import { EmailTypeConst, Service, ServiceEmail } from "../../@types";
 import logger from "../../logger";
 import { sendEmail } from "../common/emailService";
 import { format } from 'date-fns';
+import { SERVICE_MAINTENANCE_TYPES } from "../../constants";
 
 const prisma = new PrismaClient();
 

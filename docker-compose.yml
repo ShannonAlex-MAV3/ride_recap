@@ -40,13 +40,10 @@ services:
   migrate:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.migrate
     container_name: ride_recap_migrate
     env_file:
       - .env
-    command: npx prisma migrate deploy
-    volumes:
-      - ./backend/prisma:/app/prisma
     restart: "no"
 
 networks:

@@ -1,5 +1,5 @@
 import { Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
-import cog from "../../frontend/src/assets/cog.svg";
+import cog from "./assets/cog.svg";
 import "./App.css";
 import AddEditCustomer from "./app/customer/AddEdit";
 import CustomerBase from "./app/customer/Customer";

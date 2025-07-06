@@ -18,9 +18,8 @@ print_usage() {
     echo "  prod        Start production environment"
     echo "  stop        Stop all services"
     echo "  logs        Show logs for all services"
-    echo "  logs [svc]  Show logs for specific service (backend, frontend, db)"
-    echo "  migrate     Run database migrations"
-    echo "  reset       Reset database (WARNING: deletes all data)"
+    echo "  logs [svc]  Show logs for specific service (backend, frontend)"
+    echo "  migrate     Run database migrations (external cloud database)"
     echo "  build       Build all images"
     echo "  clean       Clean up containers, images, and volumes"
     echo "  help        Show this help message"
@@ -62,17 +61,8 @@ case "$1" in
         ;;
     
     "migrate")
-        echo -e "${GREEN}Running database migrations...${NC}"
+        echo -e "${GREEN}Running database migrations on external cloud database...${NC}"
         docker-compose exec backend npx prisma migrate deploy
-        ;;
-    
-    "reset")
-        echo -e "${RED}WARNING: This will delete all database data!${NC}"
-        read -p "Are you sure? (y/N): " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            docker-compose exec backend npx prisma migrate reset --force
-        fi
         ;;
     
     "build")

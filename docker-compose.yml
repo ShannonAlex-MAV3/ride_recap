@@ -1,6 +1,16 @@
 version: '3.8'
 
 services:
+  # Database migrations (run once) - Uses external cloud database
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.migrate
+    container_name: ride_recap_migrate
+    env_file:
+      - backend/.env
+    restart: "no"
+
   # Backend API
   backend:
     build:
@@ -8,7 +18,7 @@ services:
       dockerfile: Dockerfile
     container_name: ride_recap_backend
     env_file:
-      - .env
+      - backend/.env
     environment:
       NODE_ENV: production
       PORT: 8080
@@ -16,8 +26,11 @@ services:
       - "8080:8080"
     volumes:
       - ./backend/uploads:/app/uploads
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -34,19 +47,16 @@ services:
     depends_on:
       - backend
     environment:
-      - VITE_API_URL=${VITE_API_URL}
+      - VITE_API_URL=http://localhost:8080
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-  # Database migrations (run once)
-  migrate:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.migrate
-    container_name: ride_recap_migrate
-    env_file:
-      - .env
-    restart: "no"
-    depends_on:
-      - backend
+volumes:
+  # No local database volumes needed - using external cloud database
 
 networks:
   default:

@@ -29,6 +29,9 @@ RUN npm run build
 # Production image - use nginx to serve static files
 FROM nginx:alpine AS runner
 
+# Install wget for health checks
+RUN apk add --no-cache wget
+
 # Copy built application
 COPY --from=builder /app/dist /usr/share/nginx/html
 

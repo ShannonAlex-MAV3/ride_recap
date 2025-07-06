@@ -2,38 +2,38 @@ export const BASE_URL = "/api";
 
 export const API_URLS = {
     // Job-Config URLS
-    getAllJobConfigs: `/job-configs`,
+    getAllJobConfigs: `${BASE_URL}/job-configs`,
     saveJobConfig: `${BASE_URL}/job-configs/save`,
     updateJobConfig: `${BASE_URL}/job-configs/update`,
 
     // Customer URLS
-    getAllCustomers: `/customers`,
-    saveCustomer: `/customers/save`,
+    getAllCustomers: `${BASE_URL}/customers`,
+    saveCustomer: `${BASE_URL}/customers/save`,
     updateCustomer: `${BASE_URL}/customers/update`,
     getJCustomerById: (customerID: number) => `${BASE_URL}/customers/${customerID}`,
-    getSpecificVehicleOfCustomer: (customerID: number, vehicleID: number) => `/customers/${customerID}/vehicles/${vehicleID}`,
+    getSpecificVehicleOfCustomer: (customerID: number, vehicleID: number) => `${BASE_URL}/customers/${customerID}/vehicles/${vehicleID}`,
 
     // Dashboard URLS
-    getTotalCustomersForDSB: `/dashboard/getTotalCustomers`,
-    getTotalVehiclesForDSB: `/dashboard/getTotalVehicles`,
-    getTrendingJobsForDSB: `/dashboard/getMaintenanceTrend`,
-    getVehiclesByCustomerId: (customerID: number) => `/customers/${customerID}/vehicles`,
+    getTotalCustomersForDSB: `${BASE_URL}/dashboard/getTotalCustomers`,
+    getTotalVehiclesForDSB: `${BASE_URL}/dashboard/getTotalVehicles`,
+    getTrendingJobsForDSB: `${BASE_URL}/dashboard/getMaintenanceTrend`,
+    getVehiclesByCustomerId: (customerID: number) => `${BASE_URL}/customers/${customerID}/vehicles`,
 
     // Repair URLS
-    getAllRepairs: `/repair`,
-    getAllRepairsWithDetails: `/repair/getAllRepairsWithDetails`,
-    addRepair: `/repair/save`,
-    updateRepair: (repairID: number) => `/repair/update/${repairID}`,
-    getRepairById: (repairID: number) => `/repair/${repairID}`,
+    getAllRepairs: `${BASE_URL}/repair`,
+    getAllRepairsWithDetails: `${BASE_URL}/repair/getAllRepairsWithDetails`,
+    addRepair: `${BASE_URL}/repair/save`,
+    updateRepair: (repairID: number) => `${BASE_URL}/repair/update/${repairID}`,
+    getRepairById: (repairID: number) => `${BASE_URL}/repair/${repairID}`,
 
     // Mechanic URLS
-    getAllMechanics: '/mechanic',
+    getAllMechanics: `${BASE_URL}/mechanic`,
 
     // Service API's
     SERVICE: {
-        getAllServices: `/service`,
-        addService: `/service/save`,
-        updateService: (serviceID: number) => `/service/update/${serviceID}`,
-        getServiceById: (serviceID: number) => `/service/${serviceID}`,
+        getAllServices: `${BASE_URL}/service`,
+        addService: `${BASE_URL}/service/save`,
+        updateService: (serviceID: number) => `${BASE_URL}/service/update/${serviceID}`,
+        getServiceById: (serviceID: number) => `${BASE_URL}/service/${serviceID}`,
     }
 }

@@ -16,9 +16,8 @@ function Print-Usage {
     Write-Host "  prod        Start production environment"
     Write-Host "  stop        Stop all services"
     Write-Host "  logs        Show logs for all services"
-    Write-Host "  logs [svc]  Show logs for specific service (backend, frontend, db)"
-    Write-Host "  migrate     Run database migrations"
-    Write-Host "  reset       Reset database (WARNING: deletes all data)"
+    Write-Host "  logs [svc]  Show logs for specific service (backend, frontend)"
+    Write-Host "  migrate     Run database migrations (external cloud database)"
     Write-Host "  build       Build all images"
     Write-Host "  clean       Clean up containers, images, and volumes"
     Write-Host "  help        Show this help message"
@@ -60,16 +59,8 @@ switch ($Command.ToLower()) {
     }
     
     "migrate" {
-        Write-Host "Running database migrations..." -ForegroundColor Green
+        Write-Host "Running database migrations on external cloud database..." -ForegroundColor Green
         docker-compose exec backend npx prisma migrate deploy
-    }
-    
-    "reset" {
-        Write-Host "WARNING: This will delete all database data!" -ForegroundColor Red
-        $confirm = Read-Host "Are you sure? (y/N)"
-        if ($confirm -eq 'y' -or $confirm -eq 'Y') {
-            docker-compose exec backend npx prisma migrate reset --force
-        }
     }
     
     "build" {

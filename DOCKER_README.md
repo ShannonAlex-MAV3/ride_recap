@@ -67,10 +67,9 @@ docker-compose up -d --build
 ```
 
 This will start:
-- PostgreSQL database on port 5432
 - Backend API on port 8080 (optimized build)
 - Frontend on port 3000 (served by Nginx)
-- Database migrations (runs once)
+- Database migrations (runs once on external cloud database)
 
 ## Available Services
 
@@ -78,7 +77,8 @@ This will start:
 |---------|------------------|-----------------|-------------|
 | Frontend | 3000 | 3000 | React application |
 | Backend | 8080 | 8080 | Express.js API |
-| Database | 5432 | 5432 | PostgreSQL |
+
+**Note:** This project uses an external cloud database (Aiven PostgreSQL), so no local database container is needed.
 
 ## Useful Commands
 
@@ -95,7 +95,6 @@ docker-compose logs
 # Specific service
 docker-compose logs backend
 docker-compose logs frontend
-docker-compose logs db
 
 # Follow logs in real-time
 docker-compose logs -f backend
@@ -106,7 +105,7 @@ docker-compose logs -f backend
 # Stop all services
 docker-compose down
 
-# Stop and remove volumes (WARNING: This will delete your database data)
+# Stop and remove volumes (NOTE: No local database volumes to worry about)
 docker-compose down -v
 ```
 
@@ -134,27 +133,24 @@ docker-compose exec backend npx prisma studio
 
 ## Database Management
 
-### Run migrations
+### Run migrations on external cloud database
 ```bash
 # In development
 docker-compose -f docker-compose.dev.yml exec backend npx prisma migrate dev
 
-# In production (migrations run automatically)
+# In production (migrations run automatically during deployment)
 docker-compose exec backend npx prisma migrate deploy
 ```
 
-### Access Prisma Studio
+### Access Prisma Studio (connects to external cloud database)
 ```bash
 docker-compose exec backend npx prisma studio
 ```
 
-Then open http://localhost:5555 in your browser.
+Then open http://localhost:5555 in your browser to view your cloud database data.
 
-### Reset database
-```bash
-# WARNING: This will delete all data
-docker-compose exec backend npx prisma migrate reset
-```
+### Database Management
+**Note:** This project uses an external cloud database (Aiven PostgreSQL). Database reset operations should be performed carefully through your cloud provider's interface or Prisma Studio.
 
 ## File Uploads
 
@@ -176,14 +172,11 @@ The backend uploads directory is mounted as a volume, so uploaded files persist 
    ```
 
 ### Database connection issues
-1. Ensure the database container is healthy:
+1. Verify your external cloud database connection string in the `.env` file
+2. Ensure your cloud database is accessible and credentials are correct
+3. Check backend logs for connection errors:
    ```bash
-   docker-compose ps
-   ```
-
-2. Check database logs:
-   ```bash
-   docker-compose logs db
+   docker-compose logs backend
    ```
 
 ### Frontend not loading
@@ -237,11 +230,5 @@ docker-compose exec backend npm update
 docker-compose exec frontend npm update
 ```
 
-### Backup database
-```bash
-# Create backup
-docker-compose exec db pg_dump -U postgres ride_recap > backup.sql
-
-# Restore backup
-docker-compose exec -T db psql -U postgres ride_recap < backup.sql
-```
+### Database Backup
+**Note:** Database backup and restore operations for the external cloud database should be performed through your cloud provider's interface (Aiven Console) or using Prisma Studio. Local backup commands are not applicable since the database is hosted externally.

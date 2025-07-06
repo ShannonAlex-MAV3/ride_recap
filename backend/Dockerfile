@@ -1,8 +1,8 @@
 # Multi-stage build for production
 FROM node:18-alpine AS base
 
-# Install OpenSSL and other dependencies
-RUN apk add --no-cache openssl libc6-compat
+# Install OpenSSL, wget and other dependencies
+RUN apk add --no-cache openssl libc6-compat wget
 
 # Install dependencies only when needed
 FROM base AS deps

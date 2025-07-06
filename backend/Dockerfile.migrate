@@ -16,7 +16,5 @@ COPY prisma ./prisma
 # Generate Prisma client
 RUN npx prisma generate
 
-# Create a script to run migrations
-RUN echo '#!/bin/sh\nnpx prisma migrate deploy' > /migrate.sh && chmod +x /migrate.sh
-
-CMD ["/migrate.sh"]
+# Use direct command instead of script
+CMD ["npx", "prisma", "migrate", "deploy"]

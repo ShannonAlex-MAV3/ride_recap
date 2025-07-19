@@ -24,8 +24,6 @@ services:
       PORT: 8080
     ports:
       - "8080:8080"
-    volumes:
-      - ./backend/uploads:/app/uploads
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -54,9 +52,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
-volumes:
-  # No local database volumes needed - using external cloud database
 
 networks:
   default:

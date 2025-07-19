@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Database migrations (run once) - Uses external cloud database
   migrate:

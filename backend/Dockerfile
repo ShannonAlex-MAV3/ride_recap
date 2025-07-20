@@ -1,4 +1,7 @@
-FROM node:18-slim
+FROM node:18-alpine
+
+# Install OpenSSL
+RUN apk add --no-cache openssl
 
 WORKDIR /app
 

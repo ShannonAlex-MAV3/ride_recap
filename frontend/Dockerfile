@@ -1,4 +1,5 @@
-FROM node:18-slim
+# Multi-stage build
+FROM node:18-slim AS builder
 
 WORKDIR /app
 
@@ -10,8 +11,16 @@ RUN npm ci && npm cache clean --force
 COPY . .
 RUN npm run build
 
-# Install and use nginx to serve
-RUN npm install -g serve
+# Production stage with nginx
+FROM nginx:alpine
+
+# Copy built files
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Expose port 80
 EXPOSE 80
 
-CMD ["serve", "-s", "dist", "-l", "80"]
+CMD ["nginx", "-g", "daemon off;"]

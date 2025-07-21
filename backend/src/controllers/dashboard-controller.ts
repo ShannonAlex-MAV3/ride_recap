@@ -89,3 +89,24 @@ export const getLatestRepairs = async (req: Request, res: Response) => {
     logger.info("End: get latest repairs for dashboard.");
 
 };
+
+export const getRepairsByJobCategory = async (req: Request, res: Response) => {
+
+    logger.info("Start: get repairs by job category for dashboard.");
+
+    try {
+        const response = await dashboardService.getRepairsByJobCategory();
+
+        res.json(response);
+    } catch (error) {
+        if (error instanceof Error) {
+            res.status(500).json({ message: error.message });
+        } else {
+            res.status(500).json({ message: "An unknown error occurred" });
+        }
+        logger.error("Error", { message: (error as Error).message, stack: (error as Error).stack });
+
+    }
+
+    logger.info("End: get repairs by job category for dashboard.");
+};

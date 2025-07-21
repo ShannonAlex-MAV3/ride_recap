@@ -149,3 +149,49 @@ export const getLatestRepairs = async (): Promise<LatestRepairs[]> => {
 
     return formattedResult ?? [];
 }
+
+type RepairsByJobs = {
+    category: string;
+    count: number
+};
+
+export const getRepairsByJobCategory = async (): Promise<RepairsByJobs[]> => {
+
+    logger.info("Start: Fetching repair details by jobs for Dashboard.");
+
+    const repairsWithJob = await prisma.repair.findMany({
+        select: {
+            jobID: true,
+        },
+    });
+
+    const jobs = await prisma.jobConfig.findMany({
+        select: {
+            jobID: true,
+            jobName: true,
+        },
+    });
+
+    // Create a mapping of jobID -> jobName
+    const jobNameMap = Object.fromEntries(jobs.map(job => [job.jobID, job.jobName]));
+
+    // Count repairs grouped by jobName
+    const jobNameCountMap: Record<string, number> = {};
+
+    repairsWithJob.forEach(({ jobID }) => {
+        const jobName = jobNameMap[jobID];
+        if (jobName) {
+            jobNameCountMap[jobName] = (jobNameCountMap[jobName] || 0) + 1;
+        }
+    });
+
+    // Final formatted array
+    const jobCategoryData = Object.entries(jobNameCountMap).map(([jobName, count]) => ({
+        category: jobName,
+        count,
+    }));
+
+    logger.info(`End: Start: Fetching repair details by jobs for Dashboard.`);
+
+    return jobCategoryData ?? [];
+}

@@ -7,5 +7,6 @@ router.get("/dashboard/getTotalCustomers", dashboardController.getTotalCustomers
 router.get("/dashboard/getTotalVehicles", dashboardController.getTotalVehicles);
 router.get("/dashboard/getMaintenanceTrend", dashboardController.getMaintenanceTrend);
 router.get("/dashboard/getLatestRepairs", dashboardController.getLatestRepairs);
+router.get("/dashboard/getRepairsByJobCategory", dashboardController.getRepairsByJobCategory);
 
 export default router;

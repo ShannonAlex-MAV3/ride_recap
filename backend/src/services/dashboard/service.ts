@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import logger from "../../logger";
+import { RepairWithDetails } from "../../@types";
 
 const prisma = new PrismaClient();
 
@@ -97,6 +98,54 @@ export const getMaintenanceTrend = async (): Promise<JobWiseAutoCare[]> => {
     }));
 
     logger.info(`End: Fetched maintenance job trend`);
+
+    return formattedResult ?? [];
+}
+
+type LatestRepairs = {
+    repairID: number
+    repairCode: string;
+    jobCode: string;
+    jobName: string;
+    firstName: string;
+    lastName: string;
+    licensePlate: string;
+};
+
+export const getLatestRepairs = async (): Promise<LatestRepairs[]> => {
+    logger.info("Start: Fetching latest repairs.");
+
+    const result: any[] = await prisma.$queryRaw<LatestRepairs[]>
+        `
+            SELECT 
+                r."repairID",
+                r."repairCode",
+                j."jobCode",
+                j."jobName",
+                c."firstName",
+                c."lastName",
+                v."licensePlate"
+            FROM "Repair" r
+            INNER JOIN "Customer" c ON r."customerID" = c."customerID"
+            INNER JOIN "Vehicle" v ON c."customerID" = v."customerID"
+            INNER JOIN "JobConfig" j ON r."jobID" = j."jobID"
+            WHERE r."status" = 'ACT'
+            ORDER BY r."createdAt" DESC
+            LIMIT 5;
+        `;
+
+    // Convert BigInt values to numbers
+    const formattedResult: LatestRepairs[] = result.map(row => ({
+        repairID: row.repairID,
+        repairCode: row.repairCode,
+        jobCode: row.jobCode,
+        jobName: row.jobName,
+        firstName: row.firstName,
+        lastName: row.lastName,
+        licensePlate: row.licensePlate,
+    }));
+
+    logger.info(`End: Fetched latest repairs`);
 
     return formattedResult ?? [];
 }

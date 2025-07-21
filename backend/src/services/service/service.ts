@@ -1,4 +1,3 @@
-import { url } from 'inspector';
 import { Service, ServiceWithDetails } from '../../@types';
 import logger from '../../logger';
 import { getS3Service } from '../storage/storage';

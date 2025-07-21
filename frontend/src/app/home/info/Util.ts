@@ -16,6 +16,16 @@ export interface MaintenanceTrendingJobsDSB {
     value: number;
 }
 
+export interface LatestRepairsDSB {
+    repairID: number
+    repairCode: string;
+    jobCode: string;
+    jobName: string;
+    firstName: string;
+    lastName: string;
+    licensePlate: string;
+}
+
 export const fetchTotalCustomersForDSB = async (): Promise<TotalCustomerDSB> => {
   const response = await apiService.get(API_URLS.getTotalCustomersForDSB,
     {
@@ -54,3 +64,16 @@ export const fetchTrendingJobsForDSB = async (): Promise<MaintenanceTrendingJobs
     })
   return response;
 };
+
+export const fetchLatestRepairsForDSB = async (): Promise<LatestRepairsDSB[]> => {
+  const response = await apiService.get(API_URLS.getLatestRepairsForDSB,
+    {
+      toast: {
+        enabled: true,
+        error: {
+          message: 'Failed to  fetch Latest Repair Info.',
+        }
+      }
+    })
+  return response;
+}

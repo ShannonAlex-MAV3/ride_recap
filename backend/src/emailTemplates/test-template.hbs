@@ -1,0 +1,19 @@
+<!-- filepath: d:\Projects\ride_recap\backend\src\emailTemplates\test-template.hbs -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Email</title>
+</head>
+<body>
+    <h1>Test Email</h1>
+    {{#if name}}
+        <p>Hello, {{name}}!</p>
+    {{/if}}
+    {{#if message}}
+        <p>{{message}}</p>
+    {{/if}}
+    {{#if timestamp}}
+        <p>Sent at: {{timestamp}}</p>
+    {{/if}}
+</body>
+</html>

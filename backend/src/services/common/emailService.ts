@@ -1,12 +1,18 @@
-import { Resend } from "resend";
+import nodemailer from 'nodemailer';
 import { EmailType } from "../../@types";
 import logger from "../../logger";
 import fs from 'fs';
 import path from 'path';
 import Handlebars from 'handlebars';
 
-// Initialize with your API key
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Gmail SMTP transporter
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.GMAIL_EMAIL, 
+        pass: process.env.GMAIL_APP_PASSWORD,
+    },
+});
 
 export interface EmailOptions {
     to: string;
@@ -28,16 +34,17 @@ export const sendEmail = async ({ to, subject, data, type, html, templateName }:
     const emailSubject = subject || `New ${type} record created`;
 
     try {
-        const response = await resend.emails.send({
-            from: process.env.EMAIL_FROM || 'Ride-Recap <onboarding@resend.dev>', // TODO: change when production current dev testing purpose
-            to: 'yomal.2018471@iit.ac.lk',  // TODO: change when production current dev testing purpose
+        const mailOptions = {
+            from: process.env.GMAIL_USER || process.env.EMAIL_FROM || 'Ride-Recap <your-email@gmail.com>',
+            to: to, // Use the actual recipient instead of hardcoded email
             subject: emailSubject,
             html: emailHtml,
             text: plainText,
-        });
+        };
 
-        logger.info('Resend API response:', response);
+        const response = await transporter.sendMail(mailOptions);
 
+        logger.info('Nodemailer response:', response);
         logger.info(`[EMAIL:${type}] sent to ${to}`);
         return response;
     } catch (error) {

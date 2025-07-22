@@ -102,7 +102,7 @@ export const updateService = async (req: Request, res: Response) => {
     logger.info("End: update service by id.");
 }
 
-/* export const testServiceEmail = async (req: Request, res: Response) => {
+export const testServiceEmail = async (req: Request, res: Response) => {
 
     try {
         const serviceId = parseInt(req.params.serviceID, 10);
@@ -120,4 +120,3 @@ export const updateService = async (req: Request, res: Response) => {
         logger.error("Error", { message: (error as Error).message, stack: (error as Error).stack });
     }
 }
- */

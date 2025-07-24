@@ -125,7 +125,7 @@ export const notifyServiceCreation = async (sendTo: string, serviceMailDetails: 
   }
 };
 
-/* export const testEmailGeneration = async (serviceID: number) => {
+export const testEmailGeneration = async (serviceID: number) => {
   const service = await prisma.service.findUnique({
     where: { serviceID },
     include: {
@@ -166,4 +166,4 @@ export const notifyServiceCreation = async (sendTo: string, serviceMailDetails: 
   await notifyServiceCreation(customer.email, emailHTMLContent);
 
   logger.info(`✅ Test email sent successfully for service ID: ${serviceID}`);
-}; */
+};

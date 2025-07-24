@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import logger from "../../logger";
+import { RepairWithDetails } from "../../@types";
 
 const prisma = new PrismaClient();
 
@@ -99,4 +100,98 @@ export const getMaintenanceTrend = async (): Promise<JobWiseAutoCare[]> => {
     logger.info(`End: Fetched maintenance job trend`);
 
     return formattedResult ?? [];
+}
+
+type LatestRepairs = {
+    repairID: number
+    repairCode: string;
+    jobCode: string;
+    jobName: string;
+    firstName: string;
+    lastName: string;
+    licensePlate: string;
+};
+
+export const getLatestRepairs = async (): Promise<LatestRepairs[]> => {
+    logger.info("Start: Fetching latest repairs.");
+
+    const result: any[] = await prisma.$queryRaw<LatestRepairs[]>
+        `
+            SELECT 
+                r."repairID",
+                r."repairCode",
+                j."jobCode",
+                j."jobName",
+                c."firstName",
+                c."lastName",
+                v."licensePlate"
+            FROM "Repair" r
+            INNER JOIN "Customer" c ON r."customerID" = c."customerID"
+            INNER JOIN "Vehicle" v ON c."customerID" = v."customerID"
+            INNER JOIN "JobConfig" j ON r."jobID" = j."jobID"
+            WHERE r."status" = 'ACT'
+            ORDER BY r."createdAt" DESC
+            LIMIT 5;
+        `;
+
+    // Convert BigInt values to numbers
+    const formattedResult: LatestRepairs[] = result.map(row => ({
+        repairID: row.repairID,
+        repairCode: row.repairCode,
+        jobCode: row.jobCode,
+        jobName: row.jobName,
+        firstName: row.firstName,
+        lastName: row.lastName,
+        licensePlate: row.licensePlate,
+    }));
+
+    logger.info(`End: Fetched latest repairs`);
+
+    return formattedResult ?? [];
+}
+
+type RepairsByJobs = {
+    category: string;
+    count: number
+};
+
+export const getRepairsByJobCategory = async (): Promise<RepairsByJobs[]> => {
+
+    logger.info("Start: Fetching repair details by jobs for Dashboard.");
+
+    const repairsWithJob = await prisma.repair.findMany({
+        select: {
+            jobID: true,
+        },
+    });
+
+    const jobs = await prisma.jobConfig.findMany({
+        select: {
+            jobID: true,
+            jobName: true,
+        },
+    });
+
+    // Create a mapping of jobID -> jobName
+    const jobNameMap = Object.fromEntries(jobs.map(job => [job.jobID, job.jobName]));
+
+    // Count repairs grouped by jobName
+    const jobNameCountMap: Record<string, number> = {};
+
+    repairsWithJob.forEach(({ jobID }) => {
+        const jobName = jobNameMap[jobID];
+        if (jobName) {
+            jobNameCountMap[jobName] = (jobNameCountMap[jobName] || 0) + 1;
+        }
+    });
+
+    // Final formatted array
+    const jobCategoryData = Object.entries(jobNameCountMap).map(([jobName, count]) => ({
+        category: jobName,
+        count,
+    }));
+
+    logger.info(`End: Start: Fetching repair details by jobs for Dashboard.`);
+
+    return jobCategoryData ?? [];
 }

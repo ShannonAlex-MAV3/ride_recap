@@ -17,7 +17,9 @@ export const API_URLS = {
     getTotalCustomersForDSB: `${BASE_URL}/dashboard/getTotalCustomers`,
     getTotalVehiclesForDSB: `${BASE_URL}/dashboard/getTotalVehicles`,
     getTrendingJobsForDSB: `${BASE_URL}/dashboard/getMaintenanceTrend`,
+    getLatestRepairsForDSB: `${BASE_URL}/dashboard/getLatestRepairs`,
     getVehiclesByCustomerId: (customerID: number) => `${BASE_URL}/customers/${customerID}/vehicles`,
+    getJobWiseRepairsForDSB: `${BASE_URL}/dashboard/getRepairsByJobCategory`,
 
     // Repair URLS
     getAllRepairs: `${BASE_URL}/repair`,

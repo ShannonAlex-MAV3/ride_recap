@@ -12,8 +12,23 @@ export interface TotalVehicleDSB {
 }
 
 export interface MaintenanceTrendingJobsDSB {
-    name: string;
-    value: number;
+  name: string;
+  value: number;
+}
+
+export interface LatestRepairsDSB {
+  repairID: number
+  repairCode: string;
+  jobCode: string;
+  jobName: string;
+  firstName: string;
+  lastName: string;
+  licensePlate: string;
+}
+
+export interface RepairsByJobs {
+  category: string;
+  count: number
 }
 
 export const fetchTotalCustomersForDSB = async (): Promise<TotalCustomerDSB> => {
@@ -54,3 +69,29 @@ export const fetchTrendingJobsForDSB = async (): Promise<MaintenanceTrendingJobs
     })
   return response;
 };
+
+export const fetchLatestRepairsForDSB = async (): Promise<LatestRepairsDSB[]> => {
+  const response = await apiService.get(API_URLS.getLatestRepairsForDSB,
+    {
+      toast: {
+        enabled: true,
+        error: {
+          message: 'Failed to fetch Latest Repair Info.',
+        }
+      }
+    })
+  return response;
+}
+
+export const fetchJobWiseRepairsForDSB = async (): Promise<RepairsByJobs[]> => {
+  const response = await apiService.get(API_URLS.getJobWiseRepairsForDSB,
+    {
+      toast: {
+        enabled: true,
+        error: {
+          message: 'Failed to fetch job wise repair Info.',
+        }
+      }
+    })
+  return response;
+}

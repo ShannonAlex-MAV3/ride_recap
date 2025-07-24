@@ -1,8 +1,7 @@
-import { url } from 'inspector';
 import { Service, ServiceWithDetails } from '../../@types';
 import logger from '../../logger';
 import { getS3Service } from '../storage/storage';
-import { generateUniqueServiceCode, prepareHTMLContentForService, notifyServiceCreation } from './support';
+import { generateUniqueServiceCode, prepareHTMLContentForService, notifyServiceCreation, testEmailGeneration } from './support';
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -308,11 +307,11 @@ export const getAllServices = async (customerIds?: number[], vehicleLicensePlate
     return result as ServiceWithDetails[];
 }
 
-/* export const testServiceEmail = async (serviceID: number) => {
+export const testServiceEmail = async (serviceID: number) => {
     logger.info(`Start: email testing for service: ${serviceID}`);
 
 
     await testEmailGeneration(serviceID);
 
     logger.info(`End: email testing for service: ${serviceID}`);
-} */
+}

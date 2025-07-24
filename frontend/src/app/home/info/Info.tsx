@@ -1,6 +1,8 @@
 import InfoTotalCards from "./InfoTotalCards";
+import { JobCategoryBarChart } from "./JobCategoryBarChart";
+import LatestRepairsTable from "./LatestRepairsTable";
 import JobTrendPiePanel from "./MostPopularJobsPie";
-import UpcomingMaintenanceTable from "./UpcomingMaintainanceTable";
+// import UpcomingMaintenanceTable from "./UpcomingMaintainanceTable";
 
 const InfoBase = () => {
   return (
@@ -9,7 +11,8 @@ const InfoBase = () => {
         {/* Left side: Main content (cards + table) */}
         <div className="flex-1 space-y-4">
           <InfoTotalCards />
-          <UpcomingMaintenanceTable />
+          {/* <UpcomingMaintenanceTable /> */}
+          <LatestRepairsTable />
         </div>
 
         {/* Right side: Single right panel */}
@@ -19,7 +22,7 @@ const InfoBase = () => {
             {/* <h2 className="text-lg font-semibold">Right Panel</h2> */}
             {/* Right panel content goes here */}
             <JobTrendPiePanel />
-            <JobTrendPiePanel />
+            <JobCategoryBarChart />
           </div>
         </div>
       </div>

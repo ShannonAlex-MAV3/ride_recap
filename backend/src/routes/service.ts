@@ -10,6 +10,6 @@ router.get("/service", serviceController.getAllServices);
 router.get("/service/:serviceID", serviceController.getServiceById);
 router.post("/service/save",upload.array('attachments') , serviceController.saveService);
 router.put("/service/update/:serviceID", upload.array('attachments'), serviceController.updateService);
-// router.get("/service/testServiceEmail/:serviceID", serviceController.testServiceEmail);
+router.get("/service/testServiceEmail/:serviceID", serviceController.testServiceEmail);
 
 export default router;

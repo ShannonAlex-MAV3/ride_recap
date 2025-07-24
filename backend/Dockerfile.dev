@@ -13,9 +13,6 @@ COPY . .
 # Generate Prisma client
 RUN npx prisma generate
 
-# Create uploads directory
-RUN mkdir -p uploads
-
 EXPOSE 8080
 
 CMD ["npm", "run", "dev"]

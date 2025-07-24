@@ -1,43 +1,26 @@
-# Multi-stage build for production
-FROM node:18-alpine AS base
+# Multi-stage build
+FROM node:18-slim AS builder
 
-# Install OpenSSL and other dependencies
-RUN apk add --no-cache openssl libc6-compat
-
-# Install dependencies only when needed
-FROM base AS deps
 WORKDIR /app
 
-# Copy package files
+# Copy package files and install dependencies
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci && npm cache clean --force
 
-# Build the application
-FROM base AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-
-# Copy source code
+# Copy source code and build
 COPY . .
-# Copy node_modules from deps stage
-COPY --from=deps /app/node_modules ./node_modules
-
-# Build the application
 RUN npm run build
 
-# Production image - use nginx to serve static files
-FROM nginx:alpine AS runner
+# Production stage with nginx
+FROM nginx:alpine
 
-# Install wget for health checks
-RUN apk add --no-cache wget
-
-# Copy built application
+# Copy built files
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy nginx config
+# Copy nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
 
+# Expose port 80
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
